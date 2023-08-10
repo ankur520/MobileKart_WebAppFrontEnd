@@ -1,0 +1,222 @@
+:root {
+  --vendorLeftBg: #222834;
+  --vendorLeftAHover: #31374a;
+  --vendorTopBg: #141824;
+  --white: #ffffff;
+  --vendorbelowBg: #f5f7fa;
+  --blackTextColor: #222834;
+
+  margin: 0;
+  padding: 0;
+}
+
+.vendor {
+  /* background-color: #cab3b3;
+    height: 90vh; */
+}
+
+/* TOP SIDE  */
+
+.vendor .topSide {
+  height: 70px;
+  background-color: var(--vendorTopBg);
+  color: var(--white);
+  padding-right: 30px;
+  position: relative;
+}
+
+.vendor .topSide a {
+  display: block;
+  color: var(--white);
+  padding: 0 15px;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  text-transform: capitalize;
+  align-self: center;
+}
+
+/* topnav  dropdown codes  */
+.vendor .topSide .right .dropDown {
+  position: relative;
+  display: inline-block;
+}
+
+.vendor .topSide .right .dropDown .dropDownContent {
+  position: absolute;
+  top: 46px;
+  right: 15px;
+  background-color: var(--white);
+  min-width: 130px;
+  text-align: center;
+  -webkit-box-shadow: 0px 12px 15px 5px rgba(191, 187, 191, 1);
+  -moz-box-shadow: 0px 12px 15px 5px rgba(191, 187, 191, 1);
+  box-shadow: 0px 12px 15px 5px rgba(191, 187, 191, 1);
+  display: none;
+  transition: all ease 2s;
+  z-index: 1;
+}
+
+.vendor .topSide .right .dropDown .dropDownContent a {
+  padding: 10px 20px;
+  color: var(--blackTextColor);
+  cursor: pointer;
+  display: block;
+}
+
+.vendor .topSide .right .dropDown .dropDownContent a span {
+  font-size: 15px;
+  color: var(--blackTextColor);
+  vertical-align: text-bottom;
+  margin-right: 10px;
+}
+
+.vendor .topSide .right .dropDown .dropDownContent a:hover {
+  background-color: var(--vendorTopBg);
+  color: var(--white);
+}
+
+.vendor .topSide .right .dropDown:hover .dropDownContent {
+  display: block;
+}
+
+.vendor .topSide .right .dropDown:hover .dropbtn {
+  color: blue;
+  transition: all ease 2s;
+}
+
+/* BELOW SIDE  */
+.vendor .belowSide {
+  display: grid;
+  grid-template-columns: 0.2fr 1fr;
+  /* grid-column-gap: 30px; */
+  background-color: var(--vendorbelowBg);
+  height: 90vh;
+}
+
+/* BELOW SIDE -> LEFT SIDE */
+.vendor .belowSide .leftSide {
+  /* width: 200px; */
+  background-color: var(--vendorLeftBg);
+  color: var(--white);
+  /* height: 100%;   */
+  /* text-align: center; */
+}
+
+.vendor .belowSide .leftSide a {
+  display: block;
+  color: var(--white);
+  padding: 12px 0 12px 20px;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  text-transform: capitalize;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.vendor .belowSide .leftSide a span {
+  color: var(--white);
+  margin-right: 5px;
+  vertical-align: baseline;
+  font-size: 20px;
+  vertical-align: bottom;
+
+  /* font-weight: 500; */
+}
+
+.vendor .belowSide .leftSide a:hover {
+  color: var(--white);
+  cursor: pointer;
+  background-color: var(--vendorLeftAHover);
+}
+
+/* BELOW SIDE -> RIGHT SIDE */
+
+.vendor .belowSide .rightSide {
+  margin: 20px;
+}
+
+.vendor .belowSide .rightSide section {
+  background-color: #ffffff;
+  padding: 25px;
+}
+
+.vendor .belowSide .rightSide section .tabAddProduct {
+  background-color: #ffffff;
+}
+
+/* bootstrap  */
+.nav-tabs .nav-item.show .nav-link,
+.nav-tabs .nav-link.active {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.vendor .belowSide .rightSide section .tabAddProduct nav .nav-link {
+  color: black;
+}
+
+/* 
+------------------------------
+-------- vendor dashboard all products component 
+------------------------------
+*/
+
+.vendor .belowSide .rightSide section #allproduct table {
+  border: 1px solid #ddd;
+}
+
+.vendor .belowSide .rightSide section #allproduct table thead tr th {
+  color: #2271b1;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.vendor .belowSide .rightSide section #allproduct tbody .productName {
+  color: #2271b1;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.vendor .belowSide .rightSide section #allproduct tbody .belowProductName {
+  color: #2271b1;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.vendor
+  .belowSide
+  .rightSide
+  section
+  #allproduct
+  tbody
+  .belowProductName
+  span
+  a {
+  text-decoration: none;
+}
+
+.vendor .belowSide .rightSide section #allproduct tbody .stock {
+  color: #7ad03a;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.vendor .belowSide .rightSide section #allproduct tbody .price {
+  color: #1389ff;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.vendor .belowSide .rightSide section #allproduct tbody .category {
+  color: #135e96;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.vendor .belowSide .rightSide section #allproduct tbody .publish {
+  color: #2271b1;
+  font-size: 10px;
+  font-weight: 500;
+}
