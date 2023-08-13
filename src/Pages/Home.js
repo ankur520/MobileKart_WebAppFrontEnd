@@ -8,99 +8,33 @@ import axios from "axios";
 // import { AiOutlineRight } from "react-icons/ai";
 // import { AiOutlineLeft } from "react-icons/ai";
 
-// images sliders
-import { Slide } from "react-slideshow-image";
 import Slider from "react-slick";
+
 
 // pages Components
 import Header from "../Components/Header";
 import SecondHeader from "../Components/SecondHeader";
 import Footer from "../Components/Footer";
-// import { TestingDemo, Utidfasfasl } from "../Utils/Util";
+import {message, HomeCarouselsettings, buttonStylePrevArrow , buttonStyleNextArrow, bannerCarouselProperties } from "../Utils/Util"
+
+
+import Banner from "../Components/HomePageComponents/BannerCarousel/Banner";
+import ProductCarousel from "../Components/HomePageComponents/ProductCarousel/ProductCarousel";
 
 // import ProductSlider from "../ProductsSlider";
 
-const buttonStylePrevArrow = {
-  width: "30px",
-  background: "#fff",
-  border: "0px",
-  padding: "60px 20px",
-  borderRadius: "0px 10px 10px 0px",
-};
 
-const buttonStyleNextArrow = {
-  width: "30px",
-  background: "#fff",
-  border: "0px",
-  padding: "60px 20px",
-
-  borderRadius: "10px 0px 0px 10px",
-};
-
-const properties = {
-  prevArrow: (
-    <button style={{ ...buttonStylePrevArrow }}>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#fff">
-        <path d="M242 180.6v-138L0 256l242 213.4V331.2h270V180.6z" />
-      </svg>
-    </button>
-  ),
-  nextArrow: (
-    <button style={{ ...buttonStyleNextArrow }}>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#fff">
-        <path d="M512 256L270 42.6v138.2H0v150.6h270v138z" />
-      </svg>
-    </button>
-  ),
-};
-
-const images = [
+const CarouselImages = [
   "https://rukminim1.flixcart.com/fk-p-flap/3376/560/image/39f612e8c1868c6a.jpeg?q=50",
   "https://rukminim1.flixcart.com/fk-p-flap/3376/560/image/cf71d5229c7409e3.png?q=50",
   "https://rukminim1.flixcart.com/fk-p-flap/3376/560/image/319f82797db3034e.jpg?q=50",
   "https://rukminim1.flixcart.com/fk-p-flap/3376/560/image/6a46d1114486b4a2.jpeg?q=50",
 ];
 
-// -----------------------------products slider ------------------
-
-var settings = {
-  dots: false,
-  infinite: false,
-  speed: 500,
-  slidesToShow: 4,
-  slidesToScroll: 4,
-  initialSlide: 0,
-  responsive: [
-    {
-      breakpoint: 1024,
-      settings: {
-        slidesToShow: 3,
-        slidesToScroll: 3,
-        infinite: true,
-        dots: true,
-      },
-    },
-    {
-      breakpoint: 600,
-      settings: {
-        slidesToShow: 2,
-        slidesToScroll: 2,
-        initialSlide: 2,
-      },
-    },
-    {
-      breakpoint: 480,
-      settings: {
-        slidesToShow: 2,
-        slidesToScroll: 2,
-      },
-    },
-  ],
-};
-
-// ------------------------------------products slider END ---------------------
 
 const Home = (props) => {
+
+ 
   const [allProducts, setallProducts] = useState([]);
 
   const fetchFromDb = () => {
@@ -121,135 +55,43 @@ const Home = (props) => {
         }
       })
 
-      .catch(function (error) {
-        console.log("Axios Error ", error);
-      });
+      // .catch(function (error) {
+      //   console.log("Axios Error ", error);
+      // });
   };
 
   useEffect(() => {
-    // console.log("--UseEffect From Home.js  ---");
-
-    // fetch all products data from db
+   
     fetchFromDb();
   }, []);
 
   return (
     <>
-      <Header />
-      <SecondHeader />
-      <div className="selfcontainer">
-        {/* image CAROSEL */}
-        <Slide {...properties}>
-          <div className="each-slide-effect">
-            <div style={{ backgroundImage: `url(${images[0]})` }}></div>
-          </div>
-          <div className="each-slide-effect">
-            <div style={{ backgroundImage: `url(${images[1]})` }}></div>
-          </div>
-          <div className="each-slide-effect">
-            <div style={{ backgroundImage: `url(${images[2]})` }}></div>
-          </div>
 
-          <div className="each-slide-effect">
-            <div style={{ backgroundImage: `url(${images[3]})` }}></div>
-          </div>
-        </Slide>
-        <div></div>
+      <Header />
+
+      <SecondHeader />
+
+      <div className="selfcontainer">
+
+
+        <Banner imageArray={CarouselImages}  />
+      
+
         <div className="sectionTwo  row">
+
           <div className="col-2 leftSection">
             <h1>Top Offers</h1>
             <button className="btn btn-primary mt-4"> View ALL </button>
           </div>
 
-          <div className="col-8  middleSection ">
-            <Slider {...settings}>
-              {allProducts.map((data, index) => {
-                if (
-                  data.stockStatus === "In-Stock" &&
-                  data.setFeatured === true &&
-                  data.recycleBin === false
-                ) {
-                  return (
-                    <div className="productBox" key={index}>
-                      <img
-                        style={{ width: "180px", height: "200px" }}
-                        alt={data.subCategory}
-                        src={data.image1}
-                      />
-                      <p
-                        className="mt-3"
-                        style={{ fontWeight: "700", fontSize: "17px" }}
-                      >
-                        <Link
-                          to={`/productdetail/${data.Category}/${data.subCategory}/${data.id}/${data.name}/`}
-                        >
-                          {" "}
-                          {data.name.slice(0, 50) + "..."}{" "}
-                        </Link>
-                      </p>
-                      <p
-                        style={{
-                          color: "#388e3c",
-                          marginTop: "-10px",
-                          fontSize: "15px",
-                        }}
-                      >
-                        Min {data.discountPercent} % Off
-                      </p>
-                      <p
-                        style={{
-                          opacity: ".6",
-                          marginTop: "-10px",
-                          fontSize: "11px",
-                        }}
-                      >
-                        {data.subCategory}{" "}
-                      </p>
-                    </div>
-                  );
-                }
-              })}
 
-              {/* {imagesArray.map((slide, index) => {
-                return (
+          <div className="col-10  middleSection ">
 
-                  <div className="productBox" key={index}>
-                    <img
-                      style={{ width: "180px", height: "200px" }}
-                      src={slide.image}
-                    />
-                    <p
-                      className="mt-3"
-                      style={{ fontWeight: "700", fontSize: "17px" }}
-                    >
-                      {" "}
-                      Nike , Sketchers{" "}
-                    </p>
-                    <p
-                      style={{
-                        color: "#388e3c",
-                        marginTop: "-10px",
-                        fontSize: "15px",
-                      }}
-                    >
-                      Min 50% Off
-                    </p>
-                    <p
-                      style={{
-                        opacity: ".6",
-                        marginTop: "-10px",
-                        fontSize: "11px",
-                      }}
-                    >
-                      Men's Shoes
-                    </p>
-                  </div>
-                );
-              })} */}
-            </Slider>
+          <ProductCarousel  productsArray={allProducts}  subCategory="Samsung"  />
+           
           </div>
 
-          <div className="col-2 rightSection"></div>
         </div>
         {/* ------------------------------sectionThree--------------------------------------------- */}
         <div className="sectionThree ">
@@ -289,58 +131,12 @@ const Home = (props) => {
               </button>
             </div>
 
+
+
             <div className="col-10 rightSide ">
-              <Slider {...settings}>
-                {allProducts.map((data, index) => {
-                  if (
-                    data.subCategory === "Samsung" &&
-                    data.stockStatus === "In-Stock" &&
-                    data.recycleBin === false &&
-                    data.setFeatured === true
-                  ) {
-                    if (data.setFeatured === true) {
-                      return (
-                        <div className="productBox" key={index}>
-                          <img
-                            style={{ width: "180px", height: "200px" }}
-                            src={data.image1}
-                            alt={data.subCategory}
-                          />
-                          <p
-                            className="mt-3"
-                            style={{ fontWeight: "700", fontSize: "17px" }}
-                          >
-                            <Link
-                              to={`/productdetail/${data.Category}/${data.subCategory}/${data.id}/${data.name}/`}
-                            >
-                              {" "}
-                              {data.name.slice(0, 50) + "..."}{" "}
-                            </Link>
-                          </p>
-                          <p
-                            style={{
-                              color: "#388e3c",
-                              marginTop: "-10px",
-                              fontSize: "15px",
-                            }}
-                          >
-                            Min 50% Off
-                          </p>
-                          <p
-                            style={{
-                              opacity: ".6",
-                              marginTop: "-10px",
-                              fontSize: "11px",
-                            }}
-                          >
-                            {data.subCategory}{" "}
-                          </p>
-                        </div>
-                      );
-                    }
-                  }
-                })}
-              </Slider>
+
+              <ProductCarousel  productsArray={allProducts} subCategory="Samsung"    />
+           
             </div>
           </div>
         </div>
@@ -386,6 +182,8 @@ const Home = (props) => {
             />
           </div>
         </div>
+
+
         {/* ----------------------------------sectionFour----------------------------------------- */}
         <div className="sectionFour ">
           <div className="row">
@@ -405,57 +203,12 @@ const Home = (props) => {
             </div>
 
             <div className="col-10 rightSide " id="dsafsdafkmvkeo">
-              <Slider {...settings}>
-                {allProducts.map((data, index) => {
-                  if (
-                    data.subCategory === "Apple" &&
-                    data.stockStatus === "In-Stock" &&
-                    data.recycleBin === false
-                  ) {
-                    if (data.setFeatured === true) {
-                      return (
-                        <div className="productBox" key={index}>
-                          <img
-                            alt="banner"
-                            style={{ width: "180px", height: "200px" }}
-                            src={data.image1}
-                          />
-                          <p
-                            className="mt-3"
-                            style={{ fontWeight: "700", fontSize: "17px" }}
-                          >
-                            <Link
-                              to={`/productdetail/${data.Category}/${data.subCategory}/${data.id}/${data.name}/`}
-                            >
-                              {" "}
-                              {data.name.slice(0, 50) + "..."}{" "}
-                            </Link>
-                          </p>
-                          <p
-                            style={{
-                              color: "#388e3c",
-                              marginTop: "-10px",
-                              fontSize: "15px",
-                            }}
-                          >
-                            Min {data.discountPercent} % Off
-                          </p>
-                          <p
-                            style={{
-                              opacity: ".6",
-                              marginTop: "-10px",
-                              fontSize: "11px",
-                            }}
-                          >
-                            {" "}
-                            {data.subCategory}{" "}
-                          </p>
-                        </div>
-                      );
-                    }
-                  }
-                })}
-              </Slider>
+
+
+            <ProductCarousel  productsArray={allProducts} subCategory="Apple"    />
+           
+
+
             </div>
           </div>
         </div>
