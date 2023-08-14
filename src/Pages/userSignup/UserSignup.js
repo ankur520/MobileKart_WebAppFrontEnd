@@ -1,42 +1,31 @@
 import React, { useState, useEffect } from "react";
-import Header from "../Components/Header";
-
-import Footer from "../Components/Footer";
+import Header from "../../Components/Header";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import Footer from "../../Components/Footer";
 
 import jwtDecode from "jwt-decode";
-
-const sign = require("jwt-encode");
+import { useNavigate } from "react-router-dom";
+import {backendApis} from "../../Utils/APIS"
 
 const Signup = () => {
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    // token not available go back
-    if (localStorage.getItem("vendorLoginToken")) {
-      // console.log("userLoginToken is null go back ")
-      navigate("/vendor");
-    }
-  }, []);
+  // console.log(backendApis.userApi.login )
 
-  const djangoUserAPi = {
-    home: "http://localhost:8000/userApi/",
-    signup: "http://localhost:8000/userApi/signup",
-  };
-
-  const [fullName, setfullName] = useState("");
+  const [fname, setfname] = useState("");
+  const [lname, setlname] = useState("");
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
 
   const [loginEmail, setloginEmail] = useState("");
   const [loginPassword, setloginPassword] = useState("");
 
-  // const [loggedInfo, setloggedInfo] = useState([])
+  const inputOnChng = (e) => {
+    if (e.target.name === "fname") {
+      setfname(e.target.value);
+    }
 
-  const inputOnChange = (e) => {
-    if (e.target.name === "fullName") {
-      setfullName(e.target.value);
+    if (e.target.name === "lname") {
+      setlname(e.target.value);
     }
 
     if (e.target.name === "email") {
@@ -56,7 +45,7 @@ const Signup = () => {
     }
   };
 
-  const handleSignupSubmit = (e) => {
+  const handleSignupSubmit = async (e) => {
     e.preventDefault();
 
     // console.log("handle submit ");
@@ -65,72 +54,83 @@ const Signup = () => {
 
     // console.log( djangoUserAPi.signup  )
 
-    var session_url = "http://localhost:8000/vendorApi/signup";
+    // var session_url = "http://localhost:8000/userApi/signup";
 
-    let fullname = fullName;
-    let emailAddress = email;
-    let passwords = password;
+    let firstName = fname;
+    let LastName = lname;
+    let Eemail = email;
+    let Ppassword = password;
 
-    axios
-      .post(session_url, { fullname, emailAddress, passwords })
+    // console.log(djangoUserAPi.signup )
+
+    // ------------------------
+
+     await axios
+      .post(backendApis.userApi.signup, { firstName, LastName, Eemail, Ppassword })
 
       .then(function (response) {
-        if (response.data.msg === "VendorSignUpSuccessfull") {
-          alert("VendorSignUpSuccessfull");
-          setfullName("");
+        // console.log(response);
+        // console.log(response.data);
+
+        if (response.data.msg === "userSignUpSuccessfull") {
+          setfname("");
+          setlname("");
           setemail("");
           setpassword("");
 
-          // window.location.replace("/vendorsignup")
-          navigate("/vendorsignup");
+          alert(response.data.msg);
+
+          // window.location.replace("/signup")
         } else {
+          // alert("Line no 63 - Wrong msg")
           alert(response.data.msg);
         }
       })
-
       .catch(function (error) {
-        // console.log(error , "AXIOS  error");
+        // console.log("axios error", error  );
       });
-
-    // -----------------------
   };
 
-  const handleLoginOnSubmit = (e) => {
+  const handleLoginOnSubmit = async (e) => {
     e.preventDefault();
+
+    // console.log("loginEmail")
+    // console.log(loginEmail)
+    // console.log(loginPassword)
 
     let loginEmailId = loginEmail;
     let loginPasswords = loginPassword;
 
-    var sessionUrl = "http://localhost:8000/vendorApi/vendorLogin";
-
-    axios
-      .post(sessionUrl, {
+    await axios
+      .post(backendApis.userApi.login, {
         loginEmailId,
         loginPasswords,
       })
 
-      .then(function (response) {
-        if (response.data.msg === "VendorLoggedIn") {
-          // console.log("VendorLoggedIn")
+      .then( function (response) {
+        if (response.data.status === 200) {
 
-          // console.log("toki- " , response.data.token )
+          if (response.data.msg == "UserLoggedIn") {
+            alert("UserLoggedIn");
 
-          var decoded = jwtDecode(response.data.token);
-          // console.log("jwtDecode is " , decoded )
+            var decoded = jwtDecode(response.data.token);
+            // console.log("jwtDecode is " , decoded )
 
-          localStorage.setItem("vendorLoginToken", response.data.token);
+            localStorage.setItem("userLoginToken", response.data.token);
 
-          // navigation("/vendor")
+            window.location.replace("/user");
+            // navigation("/user")
+          }
 
           // setloggedInfo(response.data.fetchDetails)
-          window.location.replace("/vendor");
+          // window.location.replace("/vendor")
         } else {
           alert(response.data.msg);
         }
       })
 
       .then(function (error) {
-        // console.log("Axios Error "  ,  error)
+        
       });
   };
 
@@ -139,7 +139,10 @@ const Signup = () => {
       <Header />
 
       <div style={{ backgroundColor: "#f1f3f6" }}>
-        <h2 className="text-center pt-5 text-bold"> Vendor signup signin </h2>
+        <h2 className="text-center pt-4 pb-2 text-bold">
+          {" "}
+          USER signup signin{" "}
+        </h2>
 
         <div className="container row">
           <div className="col-sm-1"></div>
@@ -148,33 +151,31 @@ const Signup = () => {
             className="col-sm-5 py-5 px-5  "
             style={{ backgroundColor: "#fff", margin: "0 50px 0 0" }}
           >
-            <h1 className="text-center mt-3">Login </h1>
-
             <form method="POST" onSubmit={handleLoginOnSubmit}>
+              <h1 className="text-center mt-3">Login </h1>
               <div className="form-floating mt-5 mb-3">
                 <input
                   type="email"
                   className="form-control"
                   id="floatingInput"
+                  placeholder="Email address"
                   name="loginEmail"
-                  onChange={inputOnChange}
-                  placeholder=""
+                  onChange={inputOnChng}
                 />
                 <label htmlFor="floatingInput">Email address</label>
               </div>
-
               <div className="form-floating">
                 <input
                   type="password"
                   className="form-control"
                   id="loginfloatingPassword"
-                  placeholder=""
+                  placeholder="Password"
                   name="loginPassword"
-                  onChange={inputOnChange}
+                  onChange={inputOnChng}
                 />
+
                 <label htmlFor="loginfloatingPassword">Password</label>
               </div>
-
               <input
                 type="submit"
                 value="Login "
@@ -196,26 +197,40 @@ const Signup = () => {
                   className="form-control"
                   id="floatingFname"
                   placeholder="First Name"
-                  name="fullName"
-                  onChange={inputOnChange}
-                  value={fullName}
+                  name="fname"
+                  value={fname}
+                  onChange={inputOnChng}
                   required
                 />
-                <label htmlFor="floatingFname">Full Name </label>
+                <label htmlFor="floatingFname">First Name </label>
               </div>
 
               <div className="form-floating mb-3">
                 <input
-                  type="email"
+                  type="text"
                   className="form-control"
-                  id="floatingEmail"
-                  placeholder="Your Email"
-                  name="email"
-                  value={email}
-                  onChange={inputOnChange}
+                  id="floatingLname"
+                  placeholder="Last Name"
+                  name="lname"
+                  value={lname}
+                  onChange={inputOnChng}
                   required
                 />
-                <label htmlFor="floatingEmail">Your address</label>
+                <label htmlFor="floatingLname">Last Name </label>
+              </div>
+
+              <div className="form-floating mb-3">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="floatingEmail"
+                  placeholder="Your Email addres"
+                  name="email"
+                  value={email}
+                  onChange={inputOnChng}
+                  required
+                />
+                <label htmlFor="floatingEmail">Your Email address</label>
               </div>
 
               <div className="form-floating">
@@ -223,13 +238,13 @@ const Signup = () => {
                   type="password"
                   className="form-control"
                   id="floatingPassword"
-                  placeholder="Password"
+                  placeholder="Your Password"
                   name="password"
                   value={password}
-                  onChange={inputOnChange}
+                  onChange={inputOnChng}
                   required
                 />
-                <label htmlFor="floatingPassword">Password</label>
+                <label htmlFor="floatingPassword">Your Password</label>
               </div>
               <input
                 type="submit"

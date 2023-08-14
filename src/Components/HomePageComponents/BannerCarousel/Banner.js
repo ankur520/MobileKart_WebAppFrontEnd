@@ -20,15 +20,17 @@ const Banner = (props) => {
     carouselImages = props.imageArray.map((data, index) => {
       // console.log(index);
       return (
-        <>
+     
           <div className="each-slide-effect" key={index}>
             <div style={{ backgroundImage: `url( ${data}  )` }}></div>
           </div>
-        </>
+       
       );
     });
   } else {
-    carouselImages = <h4>Banner Images Not Available</h4>;
+    carouselImages = (
+      <h4 className="text-center py-5">Banner Images Not Available</h4>
+    );
   }
 
   return (

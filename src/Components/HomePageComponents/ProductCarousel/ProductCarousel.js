@@ -1,13 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-import {
-  message,
-  HomeCarouselsettings,
-  buttonStylePrevArrow,
-  buttonStyleNextArrow,
-  bannerCarouselProperties,
-} from "../../../Utils/Util";
+import { message, productSliderSettings } from "../../../Utils/Util";
 
 import Slider from "react-slick";
 
@@ -19,18 +13,19 @@ const ProductCarousel = (props) => {
 
   if (props.productsArray.length > 0) {
     sliderData = props.productsArray.map((data, index) => {
-        
       if (
-        data.subCategory === props.subCategory  &&
+        data.subCategory === props.subCategory &&
         data.stockStatus === "In-Stock" &&
         data.recycleBin === false &&
         data.setFeatured === true
       ) {
-
-
         return (
-          <>
-            <div className="productBox" key={index}>
+          
+          <div key={data.id} >
+
+
+        
+            <div className="productBox"  >
               <img
                 style={{ width: "180px", height: "200px" }}
                 src={data.image1}
@@ -59,16 +54,23 @@ const ProductCarousel = (props) => {
                 Min 50% Off
               </p>
               <p
+            
                 style={{
                   opacity: ".6",
                   marginTop: "-10px",
                   fontSize: "11px",
                 }}
+
+                title={data.subCategory}
+
+                
               >
                 {data.subCategory}{" "}
               </p>
             </div>
-          </>
+
+            </div>
+          
         );
       }
     });
@@ -78,7 +80,7 @@ const ProductCarousel = (props) => {
 
   return (
     <>
-      <Slider {...HomeCarouselsettings}>{sliderData}</Slider>
+      <Slider {...productSliderSettings}>{sliderData}</Slider>
     </>
   );
 };
