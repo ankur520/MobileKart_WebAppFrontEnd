@@ -10,12 +10,11 @@ import jwtDecode from "jwt-decode";
 const sign = require("jwt-encode");
 
 const Signup = () => {
-  const [termsCondition, settermsCondition] = useState(false);
-  const [loginTermsCondition, setloginTermsCondition] = useState(false);
-
   // const navigate = useNavigate();
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+   
+  }, []);
 
   const djangoUserAPi = {
     home: "http://localhost:8000/userApi/",
@@ -135,7 +134,7 @@ const Signup = () => {
     <>
       <Header />
 
-      <div style={{ backgroundColor: "#f1f3f6" }} data-cy="vendorSignInSignUp">
+      <div style={{ backgroundColor: "#f1f3f6" }}>
         <h2 className="text-center pt-5 text-bold"> Vendor signup signin </h2>
 
         <div className="container row">
@@ -153,7 +152,6 @@ const Signup = () => {
                   type="email"
                   className="form-control"
                   id="floatingInput"
-                  data-cy="login Email"
                   name="loginEmail"
                   onChange={inputOnChange}
                   placeholder=""
@@ -161,42 +159,21 @@ const Signup = () => {
                 <label htmlFor="floatingInput">Email address</label>
               </div>
 
-              <div className="form-floating mb-3">
+              <div className="form-floating">
                 <input
                   type="password"
                   className="form-control"
                   id="loginfloatingPassword"
                   placeholder=""
-                  data-cy="login Password"
                   name="loginPassword"
                   onChange={inputOnChange}
                 />
                 <label htmlFor="loginfloatingPassword">Password</label>
               </div>
 
-              <div class="form-group form-check">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="signUpTerms"
-                  checked={loginTermsCondition}
-                  data-cy="signup termsCondition"
-                />
-                <label
-                  id="loginTerms"
-                  className="form-check-label"
-                  for="signUpTerms"
-                  onClick={() => setloginTermsCondition(!loginTermsCondition)}
-                >
-                  I accept all terms and condition
-                </label>
-              </div>
-
               <input
                 type="submit"
                 value="Login "
-                data-cy="login button"
-                disabled={!loginTermsCondition}
                 className="w-100 btn btn-primary btn-lg px-5 mt-3 mb-5"
               />
             </form>
@@ -218,7 +195,6 @@ const Signup = () => {
                   name="fullName"
                   onChange={inputOnChange}
                   value={fullName}
-                  data-cy="signup fname"
                   required
                 />
                 <label htmlFor="floatingFname">Full Name </label>
@@ -231,7 +207,6 @@ const Signup = () => {
                   id="floatingEmail"
                   placeholder="Your Email"
                   name="email"
-                  data-cy="signup email"
                   value={email}
                   onChange={inputOnChange}
                   required
@@ -239,7 +214,7 @@ const Signup = () => {
                 <label htmlFor="floatingEmail">Your address</label>
               </div>
 
-              <div className="form-floating mb-3">
+              <div className="form-floating">
                 <input
                   type="password"
                   className="form-control"
@@ -248,34 +223,13 @@ const Signup = () => {
                   name="password"
                   value={password}
                   onChange={inputOnChange}
-                  data-cy="signup password"
                   required
                 />
                 <label htmlFor="floatingPassword">Password</label>
               </div>
-              <div class="form-group form-check">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="signUpTerms"
-                  checked={termsCondition}
-                  data-cy="signup termsCondition"
-                />
-                <label
-                  id="signUpTerms"
-                  className="form-check-label"
-                  for="signUpTerms"
-                  onClick={() => settermsCondition(!termsCondition)}
-                >
-                  I accept all terms and condition
-                </label>
-              </div>
-
               <input
                 type="submit"
-                data-cy="signup button"
-                value="Sign Up"
-                disabled={!termsCondition}
+                value="Sign Up "
                 className="w-100 btn btn-primary btn-lg px-5 mt-3 mb-5"
               />
             </form>

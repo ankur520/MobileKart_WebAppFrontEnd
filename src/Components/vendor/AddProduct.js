@@ -300,7 +300,7 @@ const AddProduct = (props) => {
 
   return (
     <>
-      <div className="tabAddProduct">
+      <div className="tabAddProduct"  >
         <nav>
           <div className="nav nav-tabs" id="nav-tab" role="tablist">
             <button

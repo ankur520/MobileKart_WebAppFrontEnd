@@ -3,8 +3,8 @@ import React from "react";
 const UserDashboardHome = (props) => {
   return (
     <>
-      <div className="container  mb-5">
-        <h4 className="text-center mb-3 mt-3 "> Vendor Dashboard </h4>
+      <div className="container  mb-5" data-cy="vendorDashboard" >
+        <h4 className="text-center mb-3 mt-3" data-cy="vendorWelcomeMsg" >Vendor Dashboard</h4>
 
         <h4>
           <b>id - </b> {props.vendorId}{" "}

@@ -102,7 +102,7 @@ const VendorDashboard = () => {
 
   return (
     <>
-      <div className="vendor">
+      <div className="vendor"  data-cy='vendorDashboardJunction' >
         <div className="topSide d-flex justify-content-between align-items-center">
           <div className="left  ">
             <h3>
@@ -216,7 +216,7 @@ const VendorDashboard = () => {
               Recycle Bin
             </Link>
 
-            <Link to="#" onClick={logOutbtnOnClick} title="Logout">
+            <Link to="#" onClick={logOutbtnOnClick} title="Logout" data-cy='vendorDashboardLogoutBtn' >
               <span>
                 <AiFillHome />
               </span>

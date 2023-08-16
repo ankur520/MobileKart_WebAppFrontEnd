@@ -4,11 +4,17 @@ import { AiFillCaretDown, AiFillCaretUp, AiFillHeart } from "react-icons/ai";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import SecondHeader from "../Components/SecondHeader";
 
 export const ProductAll = () => {
+  const navigation = useNavigate();
+
   const [allProducts, setallProducts] = useState([]);
   const [getCategory, setgetCategory] = useState([]);
   const [getSubCategory, setgetSubCategory] = useState([]);
+  const [ApiElseMessage, setApiElseMessage] = useState("");
+
 
   const fetchFromDb = () => {
     // console.log("----productall--fetchFromDb------")
@@ -46,14 +52,17 @@ export const ProductAll = () => {
             // console.log("FilterProductGETREQUEST")
             // console.log(response.data.fetchProduct);
             setallProducts(response.data.fetchProduct);
+            setApiElseMessage("")
           } else {
-            alert(response.data.msg);
+            // alert(response.data.msg);
+            setApiElseMessage(response.data.msg)
+            setallProducts([]);
           }
         })
 
-        .catch(function (error) {
-          console.log("Error", error);
-        });
+        // .catch(function (error) {
+        //   console.log("Error", error);
+        // });
     }
 
     if (fetchUrlLength === 7) {
@@ -84,14 +93,17 @@ export const ProductAll = () => {
             // console.log("FilterProductGETREQUEST")
             // console.log(response.data.fetchProduct);
             setallProducts(response.data.fetchProduct);
+            setApiElseMessage("")
           } else {
-            alert(response.data.msg);
+            // alert(response.data.msg);
+            setApiElseMessage(response.data.msg)
+            setallProducts([]);
           }
         })
 
-        .catch(function (error) {
-          console.log("Error", error);
-        });
+        // .catch(function (error) {
+        //   console.log("Error", error);
+        // });
     }
 
     if (fetchUrlLength === 5) {
@@ -107,14 +119,17 @@ export const ProductAll = () => {
             // console.log("FilterProductGETREQUEST")
             // console.log(response.data.fetchProduct);
             setallProducts(response.data.getAllProducts);
+            setApiElseMessage("")
           } else {
-            alert(response.data.msg);
+            // alert(response.data.msg);
+            setApiElseMessage(response.data.msg)
+            setallProducts([]);
           }
         })
 
-        .catch(function (error) {
-          // console.log("Error", error);
-        });
+        // .catch(function (error) {
+        //   // console.log("Error", error);
+        // });
     }
   };
 
@@ -156,81 +171,14 @@ export const ProductAll = () => {
     fetchSubCategoryFromDb();
     fetchCategoryFromDb();
     fetchFromDb();
-  }, []);
+  }, [navigation]);
 
   return (
     <>
       <Header />
 
-      <div
-        className="secondHeader"
-        style={{
-          height: "0px",
-          padding: "35px 0",
-          boxShadow: "none",
-          borderBottom: "1px solid #ddd",
-        }}
-      >
-        <div className="categoryBox">
-          <a href="/productall">
-            <p className="shopCategory">Grocery</p>
-          </a>
-        </div>
 
-        <div className="categoryBox">
-          <a href="/productall">
-            <p className="shopCategory">Mobiles & Tablets </p>
-          </a>
-        </div>
-
-        <div className="categoryBox">
-          <a href="/productall">
-            <p className="shopCategory">Electronics </p>
-          </a>
-        </div>
-
-        <div className="categoryBox">
-          <a href="/productall">
-            <p className="shopCategory">TV & Appliances </p>
-          </a>
-        </div>
-
-        <div className="categoryBox">
-          <a href="/productall">
-            <p className="shopCategory"> Fashion </p>
-          </a>
-        </div>
-
-        <div className="categoryBox">
-          <a href="/productall">
-            <p className="shopCategory">Beauty</p>
-          </a>
-        </div>
-
-        <div className="categoryBox">
-          <a href="/productall">
-            <p className="shopCategory">Home & Kitchen</p>
-          </a>
-        </div>
-
-        <div className="categoryBox">
-          <a href="/productall">
-            <p className="shopCategory">Furniture</p>
-          </a>
-        </div>
-
-        <div className="categoryBox">
-          <a href="/productall">
-            <p className="shopCategory">Flights</p>
-          </a>
-        </div>
-
-        <div className="categoryBox">
-          <a href="/productall">
-            <p className="shopCategory">Top Offers</p>
-          </a>
-        </div>
-      </div>
+{/* <SecondHeader /> */}
 
       <div className="productAllSection ">
         <div className="   left-side">
@@ -258,20 +206,23 @@ export const ProductAll = () => {
                   class="accordion-collapse collapse show"
                   data-bs-parent="#accordionExample"
                 >
+    
                   <div class="accordion-body">
                     {getCategory.map((data, index) => {
                       return (
                         <p key={index}>
-                          <a href={`/productall/${data.cat_name}/`}>
+                          <Link to={`/productall/${data.cat_name}/`}>
                             {" "}
                             {data.cat_name}{" "}
-                          </a>
+                          </Link>
                         </p>
 
                         // <a  href= ` /productall/"+{data.category} ` > Apple </a>
                       );
                     })}
                   </div>
+
+
                 </div>
               </div>
 
@@ -297,12 +248,12 @@ export const ProductAll = () => {
                     {getSubCategory.map((data, index) => {
                       return (
                         <p key={index}>
-                          <a
-                            href={`/productall/${data.cat_name}/${data.sub_cat_name}/`}
+                          <Link
+                            to={`/productall/${data.cat_name}/${data.sub_cat_name}/`}
                           >
                             {" "}
                             {data.sub_cat_name}{" "}
-                          </a>
+                          </Link>
                         </p>
 
                         // <a  href= ` /productall/"+{data.category} ` > Apple </a>
@@ -315,9 +266,17 @@ export const ProductAll = () => {
           </div>
         </div>
 
-        {/* <div className="col-1 right-middle">  </div> */}
+        {/* <div className="col-1 right-middle"> ApiElseMessage  </div> */}
 
         <div className="right-side">
+
+        <div className="d-flex flex-row category">
+            {/* <h6>Smart Watches</h6> */}
+            <p className="p-1 fs-5 text-danger bold" >
+              {ApiElseMessage}
+            </p>
+          </div>
+
           <div className="d-flex flex-row category">
             <h6>Smart Watches</h6>
             <p>

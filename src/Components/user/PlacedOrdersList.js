@@ -6,8 +6,14 @@ import { useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
+import { BrowserRouter } from "react-router-dom";
+
 const AllProducts = (props) => {
-  const navigation = useNavigate();
+
+  // <BrowserRouter>
+    const navigation = useNavigate();
+  {/* </BrowserRouter> */}
+
 
   const [placedOrderList, setplacedOrderList] = useState([]);
 
@@ -40,7 +46,7 @@ const AllProducts = (props) => {
 
   return (
     <>
-      <div id="allproduct">
+      <div id="allproduct" data-cy="placedOrdersList" >
         <table className="table table-striped">
           <thead>
             <tr>

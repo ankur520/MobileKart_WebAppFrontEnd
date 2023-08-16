@@ -44,7 +44,9 @@ function App() {
 
   return (
     <>
-      <BrowserRouter>
+
+    {/* <BrowserRouter > */}
+    
         <Routes>
           {/* USER ROUTES  */}
           <Route path="/" element={<Home />}>
@@ -84,7 +86,9 @@ function App() {
 
           <Route path="/vendorsignup" element={<VendorSignup />}></Route>
         </Routes>
-      </BrowserRouter>
+
+        {/* </BrowserRouter> */}
+  
     </>
   );
 }

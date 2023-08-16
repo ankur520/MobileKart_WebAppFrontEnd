@@ -5,9 +5,8 @@ import { message, productSliderSettings } from "../../../Utils/Util";
 
 import Slider from "react-slick";
 
-const ProductCarousel = (props) => {
-  // console.log(props.productsArray[0])
-  // console.log(props.subCategory)
+const Carousel = (props) => {
+  // console.log("Product - " , props )
 
   let sliderData = "";
 
@@ -20,12 +19,8 @@ const ProductCarousel = (props) => {
         data.setFeatured === true
       ) {
         return (
-          
-          <div key={data.id} >
-
-
-        
-            <div className="productBox"  >
+          <div key={data.id}>
+            <div className="productBox" data-cy="Products Available">
               <img
                 style={{ width: "180px", height: "200px" }}
                 src={data.image1}
@@ -54,28 +49,26 @@ const ProductCarousel = (props) => {
                 Min 50% Off
               </p>
               <p
-            
                 style={{
                   opacity: ".6",
                   marginTop: "-10px",
                   fontSize: "11px",
                 }}
-
                 title={data.subCategory}
-
-                
               >
                 {data.subCategory}{" "}
               </p>
             </div>
-
-            </div>
-          
+          </div>
         );
       }
     });
   } else {
-    sliderData = <h3>Sorry Products Not Available</h3>;
+    sliderData = (
+      <h3 data-cy="Sorry Products Not Available">
+        Sorry Products Not Available
+      </h3>
+    );
   }
 
   return (
@@ -85,4 +78,4 @@ const ProductCarousel = (props) => {
   );
 };
 
-export default ProductCarousel;
+export default Carousel;

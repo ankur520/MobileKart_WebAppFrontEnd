@@ -91,7 +91,7 @@ const UserDashboard = () => {
     <>
       <Header />
 
-      <div className="dashboard">
+      <div className="dashboard" data-cy="userDashboardJunction" >
         <div className="row ">
           <div className="col-lg-3 mt-5 leftMenu">
             <Link to="/user"> Home </Link>
@@ -100,7 +100,7 @@ const UserDashboard = () => {
 
             <Link> Wish List </Link>
             <Link> Orders </Link>
-            <Link onClick={logOutbtnOnClick}> Logout </Link>
+            <Link onClick={logOutbtnOnClick} data-cy="userDashboardLogoutBtn" > Logout </Link>
           </div>
 
           <div className="col-lg-9 mt-5 rightSec">

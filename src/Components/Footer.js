@@ -3,7 +3,8 @@ import React from "react";
 const Footer = () => {
   return (
     <>
-      <div className="aboveFooter">
+   
+      <footer className="aboveFooter" data-cy="footer"  >
         <div className="row">
           <div className="col-6">
             <div className="row">
@@ -130,7 +131,8 @@ const Footer = () => {
         </div>
 
         <hr className="border border-white" />
-      </div>
+      </footer>
+  
     </>
   );
 };
