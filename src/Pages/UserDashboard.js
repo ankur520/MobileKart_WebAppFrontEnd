@@ -4,15 +4,18 @@ import Footer from "../Components/Footer";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
-
 import UserDashboarddd from "../Components/user/UserDashboard";
 import PlacedOrdersPage from "../Components/user/PlacedOrdersList";
-
 import { useNavigate } from "react-router-dom";
-
 import jwtDecode from "jwt-decode";
+import AddAddress from "../Components/user/AddAddress";
+import ViewAllAddress from "../Components/user/ViewAllAddress";
+import WishList from "../Components/user/Wishlish";
+import { backendApis } from "../Utils/APIS";
 
 const UserDashboard = () => {
+  // console.log("userDashboard- " , backendApis)
+
   const [userFname, setuserFname] = useState(" ");
   const [userLname, setuserLname] = useState(" ");
   const [userEmail, setuserEmail] = useState(" ");
@@ -77,33 +80,27 @@ const UserDashboard = () => {
     fetchTokenFromLocal();
   }, []);
 
-  const djangoVendorAPi = {
-    addCategory: "http://localhost:8000/vendorApi/addcategory",
-    subCategory: "http://localhost:8000/vendorApi/add-sub-category",
-    addTaxes: "http://localhost:8000/vendorApi/add-tax",
-    addShipping: "http://localhost:8000/vendorApi/add-shipping",
-    getSubCatByCat: "http://localhost:8000/vendorApi/get-subcat-bycategory/",
-    signup: "http://localhost:8000/vendorApi/signup",
-    addProduct: "http://localhost:8000/vendorApi/addproduct",
-  };
-
   return (
     <>
       <Header />
 
-      <div className="dashboard" data-cy="userDashboardJunction" >
+      <div className="dashboard" data-cy="userDashboardJunction">
         <div className="row ">
-          <div className="col-lg-3 mt-5 leftMenu">
+          <div className=" col-lg-3 mt-5 leftMenu">
             <Link to="/user"> Home </Link>
+            <Link to="/user/wishlist/"> WishList </Link>
             <Link to="/user/placedorder/"> Placed Orders </Link>
+            <Link to="/user/addAddress/"> Add Address </Link>
+            <Link to="/user/viewAllAddress/"> View All Address </Link>
             <Link to="/viewcart"> Cart Page </Link>
 
-            <Link> Wish List </Link>
-            <Link> Orders </Link>
-            <Link onClick={logOutbtnOnClick} data-cy="userDashboardLogoutBtn" > Logout </Link>
+            <Link onClick={logOutbtnOnClick} data-cy="userDashboardLogoutBtn">
+              {" "}
+              Logout{" "}
+            </Link>
           </div>
 
-          <div className="col-lg-9 mt-5 rightSec">
+          <div className=" col-lg-9 mt-5 rightSec">
             {(() => {
               if (location.pathname === "/user/placedorder/") {
                 return (
@@ -112,7 +109,33 @@ const UserDashboard = () => {
                     userLname={userLname}
                     userEmail={userEmail}
                     userId={userId}
-                    APIS={djangoVendorAPi}
+                  />
+                );
+              } else if (location.pathname === "/user/addAddress/") {
+                return (
+                  <AddAddress
+                    userFname={userFname}
+                    userLname={userLname}
+                    userEmail={userEmail}
+                    userId={userId}
+                  />
+                );
+              } else if (location.pathname === "/user/viewAllAddress/") {
+                return (
+                  <ViewAllAddress
+                    userFname={userFname}
+                    userLname={userLname}
+                    userEmail={userEmail}
+                    userId={userId}
+                  />
+                );
+              } else if (location.pathname === "/user/wishlist/") {
+                return (
+                  <WishList
+                    userFname={userFname}
+                    userLname={userLname}
+                    userEmail={userEmail}
+                    userId={userId}
                   />
                 );
               } else {

@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Navigate } from "react-router-dom";
 import {
   AiOutlineArrowRight,
   AiFillStar,
@@ -13,6 +13,7 @@ import {
 import { BiMapPin } from "react-icons/bi";
 import { HiOutlineThumbUp, HiOutlineThumbDown } from "react-icons/hi";
 import { useLocation } from "react-router-dom";
+import ReactLoading from "react-loading";
 
 import Header from "../Components/Header";
 
@@ -23,13 +24,17 @@ import Footer from "../Components/Footer";
 import ProductImages from "../Components/ProductImages";
 import axios from "axios";
 import { useState, useEffect } from "react";
+import { backendApis } from "../Utils/APIS";
 
 const Productdetail = (props) => {
   // console.log("PROPS- " , props.loggedUserInfo.fetchedId )
 
+  const [isLoading, setisLoading] = useState(false);
+
   const [getProduct, setgetProduct] = useState([]);
 
-  const getProductById = () => {
+  const getProductById = async () => {
+    setisLoading(true);
     let fetchUrlLength = document.location.href.split("/").length;
     // console.log(fetchUrl)
 
@@ -45,26 +50,27 @@ const Productdetail = (props) => {
       // console.log("postData- ", postData )
 
       let sessionUrl =
-        "http://localhost:8000/vendorApi/filter-productdetail-bySlug/" +
+        backendApis.vendorApi.filter_productdetail_bySlugByFilterSlug +
         postData +
         "/";
+      // console.log(sessionUrl)
 
-      axios
+      await axios
         .get(sessionUrl)
 
-        .then(function (response) {
-          if (response.data.msg === "FilterProductGETREQUEST") {
-            // console.log("FilterProductGETREQUEST")
-            // console.log(response.data.fetchProduct);
-            setgetProduct(response.data.fetchProduct);
-          } else {
-            alert(response.data.msg);
+        .then(
+          await function (response) {
+            if (response.data.msg === "FilterProductGETREQUEST") {
+              // console.log("FilterProductGETREQUEST")
+              // console.log(response.data.fetchProduct);
+              setgetProduct(response.data.fetchProduct);
+              setisLoading(false);
+            } else {
+              alert(response.data.msg);
+              setisLoading(false);
+            }
           }
-        })
-
-        .catch(function (error) {
-          console.log("Error", error);
-        });
+        );
     }
   };
 
@@ -75,6 +81,19 @@ const Productdetail = (props) => {
   return (
     <>
       <Header />
+
+      <div data-cy="isLoading" className=" d-flex justify-content-center">
+        {isLoading ? (
+          <ReactLoading
+            type="spinningBubbles"
+            color="#2874f0"
+            height={50}
+            width={50}
+          />
+        ) : (
+          ""
+        )}
+      </div>
 
       {getProduct.map((data) => {
         const allImagesInList = [
@@ -89,10 +108,11 @@ const Productdetail = (props) => {
 
         return (
           <div key={data.id} className="productDetailBelowSection row">
-            <div className="col-5">
+            <div className="col-12 col-sm-6 col-md-6 col-lg-4 col-xl-4">
               <ProductImages prop={props} imagesList={allImagesInList} />
             </div>
-            <div className="col-7">
+
+            <div className="col-12 col-sm-6 col-md-6 col-lg-8 col-xl-8">
               <div className="breadcumb">
                 <nav aria-label="breadcrumb">
                   <ol className="breadcrumb">

@@ -4,9 +4,14 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { backendApis } from "../Utils/APIS";
+import ReactLoading from "react-loading";
+import jwtDecode from "jwt-decode";
 
 const Cart = (props) => {
   // console.log("PROPS" , props)
+  const [isLoading, setisLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const [fetchCart, setfetchCart] = useState([]);
@@ -30,45 +35,51 @@ const Cart = (props) => {
   var totalPayableAmount = 0;
   let cartIds = [];
 
-  const fetchCartById = (userId) => {
-    let sessionUrl = `http://localhost:8000/userApi/fetch-cart-byUserId/${userId}/`;
+  // console.log(backendApis.userApi.fetch_cart_byUserIdByUserId)
 
-    // console.log(sessionUrl)
+  const fetchCartById = async (userId) => {
+    setisLoading(true);
+    let sessionUrl = `${backendApis.userApi.fetch_cart_byUserIdByUserId}${userId}/`;
 
-    axios
+    await axios
       .get(sessionUrl)
 
       .then(function (response) {
-        // console.log("dataArray- ", response.data.cartFullArray);
-        if (response.data.cartFullArray.length > 0) {
-          setfetchCart(response.data.cartFullArray);
+        // to prevent from error in front end  we validated here
+        if (response.data.status === 200) {
+          if (response.data.msg === "Cart data Available") {
+            if (response.data.cartFullArray.length > 0) {
+              setfetchCart(response.data.cartFullArray);
+              setisLoading(false);
+              // console.log( response.data.cartFullArray )
+            }
+          }
+
+          if (response.data.msg === "Cart is Empty") {
+            setfetchCart([]);
+            setisLoading(false);
+          }
+
+          setloading(false);
         }
-
-        setloading(false);
-      })
-
-      .catch(function (error) {
-        // console.log("Error ", error);
       });
   };
 
-  const fetchAddressById = (userId) => {
-    let sessionUrl = `http://localhost:8000/userApi/add-address/${userId}/`;
+  const fetchAddressById = async (userId) => {
+    let sessionUrl = `${backendApis.userApi.add_addressByUserId}${userId}/`;
 
-    // console.log(sessionUrl)
-
-    axios
+    await axios
       .get(sessionUrl)
 
       .then(function (response) {
+        // console.log(response.data.dataArray)
+
         if (response.data.dataArray.length > 0) {
           setfetchAddress(response.data.dataArray);
-          // console.log(response.data.dataArray.length)
+          // console.log( response.data.dataArray )
+        } else {
+          setfetchAddress([]);
         }
-      })
-
-      .catch(function (error) {
-        // console.log("Error- ", error)
       });
   };
 
@@ -81,9 +92,10 @@ const Cart = (props) => {
       navigate("/");
     }
 
-    fetchCartById(props.loggedUserInfo.fetchedId);
+    let decoded = jwtDecode(localStorage.getItem("userLoginToken"));
 
-    fetchAddressById(props.loggedUserInfo.fetchedId);
+    fetchCartById(decoded["fetchedId"]);
+    fetchAddressById(decoded["fetchedId"]);
   }, [props]);
 
   const inputOnChange = (e) => {
@@ -96,34 +108,36 @@ const Cart = (props) => {
     }
   };
 
-  function updateCartQty(cartId, slugName) {
-    let sessionUrl = `http://localhost:8000/userApi/update-cartqty-byproductid/${cartId}/${slugName}/`;
+  const updateCartQty = async (cartId, slugName) => {
+    let sessionUrl = `${backendApis.userApi.update_cartqty_byproductidByCartIdAndQtyMessage}${cartId}/${slugName}/`;
+
     // console.log(sessionUrl)
 
-    axios
+    await axios
       .put(sessionUrl)
 
       .then(function (resposne) {
         // alert(resposne.data.msg)
-      })
-      .catch(function (error) {
-        console.log("Error- ", error);
       });
-  }
+  };
 
-  const plusBtnOnClick = (cart_id) => {
-    // console.log("plusBtnOnClick" , cart_id )
+  const plusBtnOnClick = (cart_id, currQty, maxQtyLimit) => {
+    // console.log("plusBtnOnClick", cart_id, currQty, maxQtyLimit);
 
-    setfetchCart((fetchCart) =>
-      fetchCart.map(
-        (item) =>
-          cart_id === item.id
-            ? { ...item, qty: item.qty + (item.qty < 10 ? 1 : 0) }
-            : item
-        // console.log( "inside- "  , item  )
-      )
-    );
-    updateCartQty(cart_id, "incremented");
+    if (currQty < maxQtyLimit) {
+      setfetchCart((fetchCart) =>
+        fetchCart.map(
+          (item) =>
+            cart_id === item.id
+              ? { ...item, qty: item.qty + (item.qty < maxQtyLimit ? 1 : 0) }
+              : item
+          // console.log( "inside- "  , item  )
+        )
+      );
+      updateCartQty(cart_id, "incremented");
+    } else {
+      alert("You can't add more than Stock qty");
+    }
   };
 
   const minusBtnOnClick = (cart_id) => {
@@ -144,30 +158,30 @@ const Cart = (props) => {
     updateCartQty(cart_id, "decremented");
   };
 
-  const deleteCartItem = (e, userId, cartId) => {
+  const deleteCartItem = async (e, userId, cartId) => {
     e.preventDefault();
 
     const thisClicked = e.currentTarget;
     thisClicked.innerText = "Removing";
 
-    let sessionUrl = `http://localhost:8000/userApi/delete-cartItem/${userId}/${cartId}/`;
+    let sessionUrl = `${backendApis.userApi.delete_cartItemByUserIdAndCartId}${userId}/${cartId}/`;
 
     // console.log("deletebtn- " , sessionUrl)
 
-    axios
+    await axios
       .delete(sessionUrl)
 
       .then(function (response) {
         if (response.data.msg === "CartItemDeleted") {
           alert(response.data.msg);
-          thisClicked.closest("#removeTheElement").remove();
+          // thisClicked.closest("#removeTheElement").remove();
+          // navigate("/checkout");
+          let decoded = jwtDecode(localStorage.getItem("userLoginToken"));
+
+          fetchCartById(decoded["fetchedId"]);
         } else {
           alert(response.data.msg);
         }
-      })
-
-      .catch(function (error) {
-        console.log("Error- ", error);
       });
   };
 
@@ -177,7 +191,7 @@ const Cart = (props) => {
     // const thisBtn = e.currentTarget;
   };
 
-  const placeCODOnClick = () => {
+  const placeCODOnClick = async () => {
     console.log("place order ");
 
     let addressId = getRadioValue;
@@ -185,23 +199,24 @@ const Cart = (props) => {
       alert("Please Select Your  Address");
     } else {
       let userId = props.loggedUserInfo.fetchedId;
-      let cartIdList = cartIds;
+
       let checkoutAmount = totalPayableAmount;
 
       // console.log( "addressId- ", addressId )
       // console.log( "userId- ", userId )
-      console.log("cartIdList- ", cartIdList);
+      // console.log("cartIdList- ", cartIdList);
       // console.log( "checkoutAmount- ", checkoutAmount )
 
-      console.log(typeof cartIdList);
+      // console.log(typeof cartIdList);
 
-      let sessionURL = "http://localhost:8000/userApi/placeOrder/";
+      let sessionUrl = backendApis.userApi.placeOrder + userId + "/";
 
-      axios
-        .post(sessionURL, {
+      console.log(sessionUrl);
+
+      await axios
+        .put(sessionUrl, {
           addressId,
           userId,
-          cartIdList,
           checkoutAmount,
         })
 
@@ -209,7 +224,7 @@ const Cart = (props) => {
           if (response.data.status === 200) {
             // alert(response.data.msg)
             alert("Thank You Your Order is Placed ");
-            // window.location.replace("/user/placedorder/")
+            navigate("/user/placedorder/");
           }
         });
     }
@@ -228,11 +243,11 @@ const Cart = (props) => {
       // console.log("201- " , data.userId_id[0][0].u_email )
 
       // Shipping types and Charges
-      var shippingStatus = data.productKey[0].shippingStatus;
+      var shippingStatus = data.productId.shippingStatus;
 
       switch (shippingStatus) {
         case "flatShipping":
-          deliveryCharges = data.productKey[0].shippingAmount;
+          deliveryCharges = data.productId.shippingAmount;
           break;
 
         case "locationWise":
@@ -244,10 +259,10 @@ const Cart = (props) => {
       }
 
       // Shipping types and Charges
-      var taxStatus = data.productKey[0].taxStatus;
+      var taxStatus = data.productId.taxStatus;
 
       if (taxStatus === "taxable") {
-        TaxClass = data.productKey[0].taxClass;
+        TaxClass = data.productId.taxClass;
         var stringToNo = TaxClass.match(/(\d+)/);
         TaxPercent = stringToNo[0];
       } else {
@@ -257,22 +272,19 @@ const Cart = (props) => {
 
       // total cart value
       totalCartValue +=
-        (data.productKey[0].mrp -
+        (data.productId.mrp -
           parseInt(
-            (data.productKey[0].mrp * data.productKey[0].discountPercent) / 100
+            (data.productId.mrp * data.productId.discountPercent) / 100
           )) *
         data.qty;
       // total saving on cart
       totalCartSavings +=
-        parseInt(
-          (data.productKey[0].mrp * data.productKey[0].discountPercent) / 100
-        ) * data.qty;
+        parseInt((data.productId.mrp * data.productId.discountPercent) / 100) *
+        data.qty;
       // calculate amount after discount
       finalAmountAfterDiscount =
-        data.productKey[0].mrp -
-        parseInt(
-          (data.productKey[0].mrp * data.productKey[0].discountPercent) / 100
-        );
+        data.productId.mrp -
+        parseInt((data.productId.mrp * data.productId.discountPercent) / 100);
       // calculate tax for each product on amount
       TaxesCharges = ((finalAmountAfterDiscount * TaxPercent) / 100) * data.qty;
 
@@ -284,27 +296,30 @@ const Cart = (props) => {
       );
 
       // add total cart in cart list
-      cartIds.push({ cartId: data.id, qty: data.qty });
+      // cartIds.push({ cartId: data.id, qty: data.qty });
 
       // console.log( "orderPlacedStatus- ",  data.orderPlacedStatus)
 
       if (data.orderPlacedStatus === false) {
+        // console.log( data.productId.totalUnits )
         return (
           <div key={index} id="removeTheElement" className="allCards">
             <div className="cardBox d-flex " style={{ padding: "10px 0" }}>
               <div style={{ textAlign: "center" }}>
                 <img
-                  src={data.productKey[0].image1}
+                  title="Product Image"
+                  alt={data.productId.name}
+                  src={data.productId.image1}
                   style={{ width: "100px", height: "120px" }}
                 />
                 {/* <p> id - {data.id}</p>
               <p> productId_id - {data.id}</p>
-              <p> user - {data.userKey[0].id } -- {data.userKey[0].u_email } </p> */}
+              <p> user - {data.userId.id } -- {data.userId.u_email } </p> */}
 
                 <div className="mt-3">
-                  <div className=" d-flex justify-content-between ">
+                  <div className="  ">
                     <div
-                      className="input-group d-flex w-auto justify-content-center align-items-center  "
+                      className=" d-flex w-auto justify-content-center align-items-center  "
                       id="elementId+'${index}'"
                     >
                       <input
@@ -319,6 +334,7 @@ const Cart = (props) => {
                           width: "2rem",
                           height: "2rem",
                         }}
+                        title="Decrease Qty"
                         value="-"
                         className="button-minus border rounded-circle  mx-2 "
                         data-field="quantity"
@@ -328,6 +344,7 @@ const Cart = (props) => {
                         id="quantityInput"
                         onChange={inputOnChange}
                         value={data.qty}
+                        title="Product Quantity"
                         name="productQtyInput"
                         style={{ border: "1px solid #ddd" }}
                         step="1"
@@ -336,7 +353,13 @@ const Cart = (props) => {
                       />
                       <input
                         type="button"
-                        onClick={() => plusBtnOnClick(data.id)}
+                        onClick={() =>
+                          plusBtnOnClick(
+                            data.id,
+                            data.qty,
+                            data.productId.totalUnits
+                          )
+                        }
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
@@ -346,6 +369,7 @@ const Cart = (props) => {
                           width: "2rem",
                           height: "2rem",
                         }}
+                        title="Increase Qty"
                         value="+"
                         className="button-plus border rounded-circle mx-2 "
                         data-field="quantity"
@@ -355,17 +379,11 @@ const Cart = (props) => {
                 </div>
               </div>
 
-              <div className="">
-                <p
-                  style={{
-                    color: "#212121",
-                    fontSize: "16px",
-                    fontWeight: "500",
-                  }}
-                >
-                  {data.productKey[0].name}
+              <div id="cartProductsBoxResponsive">
+                <p className="productName" title="Product Name">
+                  {data.productId.name.slice(0, 80) + "..."}
                 </p>
-                <p
+                {/* <p
                   style={{
                     color: "#878787",
                     fontSize: "13px",
@@ -374,44 +392,20 @@ const Cart = (props) => {
                   }}
                 >
                   Seller : Name
-                </p>
-                <p className="mt-2">
-                  <del
-                    style={{
-                      color: "#878787",
-                      fontSize: "13px",
-                      fontWeight: "500",
-                      marginTop: "-10px",
-                    }}
-                  >
-                    {data.productKey[0].mrp}
-                  </del>
-                  <span
-                    style={{
-                      color: "#212121",
-                      fontSize: "18px",
-                      fontWeight: "500",
-                      marginLeft: "10px",
-                    }}
-                  >
-                    ₹ {finalAmountAfterDiscount}
-                  </span>
-                  <span
-                    style={{
-                      color: "#388e3c",
-                      fontSize: "13px",
-                      fontWeight: "bold",
-                      marginLeft: "10px",
-                    }}
-                  >
-                    {data.productKey[0].discountPercent} % Off
+                </p> */}
+                <p className="mt-2 pricingRow ">
+                  <del>{data.productId.mrp}</del>
+                  <span className="price">₹ {finalAmountAfterDiscount}</span>
+                  <span className="percent">
+                    {data.productId.discountPercent} % Off
                   </span>
                 </p>
 
                 <p
+                  className="pricePerProduct"
                   style={{
                     color: "#212121",
-                    fontSize: "16px",
+                    fontSize: "10px",
                     fontWeight: "400",
                     marginTop: "-10px",
                   }}
@@ -432,16 +426,15 @@ const Cart = (props) => {
                 <p
                   style={{
                     color: "#212121",
-                    fontSize: "18px",
+                    fontSize: "12px",
                     fontWeight: "500",
                     marginTop: "-10px",
                   }}
                 >
                   Total Amount - ₹{" "}
-                  {(data.productKey[0].mrp -
+                  {(data.productId.mrp -
                     parseInt(
-                      (data.productKey[0].mrp *
-                        data.productKey[0].discountPercent) /
+                      (data.productId.mrp * data.productId.discountPercent) /
                         100
                     )) *
                     data.qty}
@@ -450,7 +443,7 @@ const Cart = (props) => {
                 <p
                   style={{
                     color: "#212121",
-                    fontSize: "18px",
+                    fontSize: "10px",
                     fontWeight: "500",
                     marginTop: "-10px",
                   }}
@@ -461,43 +454,18 @@ const Cart = (props) => {
 
                 <a
                   href="#"
+                  title="Remove Product"
                   style={{
                     color: "#212121",
-                    fontSize: "16px",
+                    fontSize: "13px",
                     fontWeight: "500",
                     fontSize: "18px",
                     textDecoration: "none",
                   }}
-                  onClick={(e) =>
-                    deleteCartItem(e, data.userKey[0].id, data.id)
-                  }
+                  onClick={(e) => deleteCartItem(e, data.userId.id, data.id)}
                 >
                   Remove
                 </a>
-              </div>
-
-              <div style={{ margin: "0 0 0 150px" }}>
-                <p
-                  style={{
-                    color: "#212121",
-                    fontSize: "16px",
-                    fontWeight: "400",
-                  }}
-                >
-                  Delivery by Tue Jul 11
-                  <span>
-                    {" | "}
-                    <b
-                      style={{
-                        color: "green",
-                        fontSize: "16px",
-                        fontWeight: "400",
-                      }}
-                    >
-                      Free
-                    </b>
-                  </span>
-                </p>
               </div>
             </div>
           </div>
@@ -541,11 +509,11 @@ const Cart = (props) => {
               <p className="down ">
                 <b>User Details -</b>
 
-                {data.userKey[0].u_fname + data.userKey[0].u_lname}
+                {data.userId.u_fname + data.userId.u_lname}
 
                 <span style={{ marginLeft: "40px" }}>
                   {" "}
-                  {data.userKey[0].u_email}{" "}
+                  {data.userId.u_email}{" "}
                 </span>
               </p>
 
@@ -624,7 +592,7 @@ const Cart = (props) => {
       <br />
 
       <div className="checkout">
-        <section style={{ padding: "30px 30px" }}>
+        <section style={{ padding: "20px 10px" }}>
           <div className=" leftSide">
             {/* second box */}
 
@@ -640,13 +608,17 @@ const Cart = (props) => {
                     <p>
                       {" "}
                       {props.loggedUserInfo.fetchedFName +
+                        " " +
                         props.loggedUserInfo.fetchedLName}{" "}
                     </p>
                     <p> {props.loggedUserInfo.fetchedEmail}</p>
                   </div>
                 </div>
 
-                <button className="align-self-center rightSideBtn">
+                <button
+                  onClick={() => navigate("/user/")}
+                  className="align-self-center rightSideBtn"
+                >
                   Change
                 </button>
               </div>
@@ -660,6 +632,18 @@ const Cart = (props) => {
                 >
                   <p className="count">2</p>
                   <p className="upper text-light"> DELIVERY ADDRESS </p>
+                  <div data-cy="isLoading" className="">
+                    {isLoading ? (
+                      <ReactLoading
+                        type="spinningBubbles"
+                        color="#fff"
+                        height={50}
+                        width={50}
+                      />
+                    ) : (
+                      ""
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -718,6 +702,7 @@ const Cart = (props) => {
                       {" "}
                       <button
                         onClick={placeCODOnClick}
+                        disabled={fetchCart.length === 0 ? true : false}
                         className="btn btn-primary w-100 mb-4 "
                       >
                         {" "}
@@ -730,7 +715,7 @@ const Cart = (props) => {
                     <p>Pay ( Razor Pay ) </p>
                     <p>
                       {" "}
-                      <button className="btn btn-primary w-100 ">
+                      <button disabled className="btn btn-primary w-100 ">
                         {" "}
                         ( Razor Pay ) ₹ {totalPayableAmount}{" "}
                       </button>
@@ -804,56 +789,3 @@ const Cart = (props) => {
 };
 
 export default Cart;
-
-{
-  /* <input
-type="button"
-className="mr-3"
-style={{
-borderRadius: "50%",
-width: "25px",
-height: "25px",
-border: "1px solid #ddd",
-fontSize: "15px",
-marginRight: "10px",
-
-}}
-value="-"
-onClick={minusBtnOnClick}
-/> */
-}
-
-{
-  /* <input
-type="number"
-style={{
-width: "50px",
-border: "1px solid #ddd",
-fontSize: "15px",
-padding: "3px",
-textAlign: "center",
-}}
-
-min={1}
-value={productQtyInput}
-name="productQtyInput"
-onChange={ inputOnChange }
-/> */
-}
-
-{
-  /* <input
-type="button"
-className="ml-3"
-style={{
-borderRadius: "50%",
-width: "25px",
-height: "25px",
-border: "1px solid #ddd",
-fontSize: "15px",
-marginLeft: "10px",
-}}
-value="+"
-onClick={plusBtnOnClick}
-/> */
-}

@@ -4,8 +4,6 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-import { backendApis } from "../Utils/APIS";
-
 // icons
 import { AiOutlineRight } from "react-icons/ai";
 import { AiOutlineLeft } from "react-icons/ai";
@@ -20,23 +18,30 @@ import { message, CarouselImages, productSliderSettings } from "../Utils/Util";
 
 import Banner from "../Components/HomePageComponents/BannerCarousel/Banner";
 import ProductBox from "../Components/HomePageComponents/ProductCarousel/ProductBox";
-
+import ReactLoading from "react-loading";
 // import ProductSlider from "../ProductsSlider";
 
+// import ErrorBoundary from "../ErrorBoundary";
+import CategoryOfferBox from "../Components/HomePageComponents/CategoryOffersCarousel/CategoryOfferBox";
+
+import { backendApis } from "../Utils/APIS";
+
 const Home = (props) => {
+  const [isLoading, setisLoading] = useState(false);
   const [allProducts, setallProducts] = useState([]);
 
-  const fetchFromDb = () => {
-    axios
+  const fetchFromDb = async () => {
+    setisLoading(true);
+    await axios
       .get(backendApis.vendorApi.addproduct)
 
       .then(function (response) {
-        if (response.data.msg === "addProductGETRequest") {
-          // console.log("addProductGETRequest")
-          // console.log(response.data.getAllProducts)
-          setallProducts(response.data.getAllProducts);
-        } else {
-          console.log("27 Else -", response);
+        // console.log(response.data);
+        if (response.data.status === 200) {
+          if (response.data.msg === "addProductGETRequest") {
+            setallProducts(response.data.getAllProducts);
+            setisLoading(false);
+          }
         }
       });
   };
@@ -48,7 +53,7 @@ const Home = (props) => {
   return (
     <>
       <Header />
-      <SecondHeader />
+      {/* <button onClick={() => methodDoesNotExist()}>Break the world</button>; */}
       <div className="selfcontainer">
         {/* <Banner imageArray={[]} /> */}
         <Banner imageArray={CarouselImages} />
@@ -59,6 +64,19 @@ const Home = (props) => {
           </div>
 
           <div className="col-10  middleSection ">
+            <span data-cy="isLoading">
+              {isLoading ? (
+                <ReactLoading
+                  type="spinningBubbles"
+                  color="#2874f0"
+                  height={25}
+                  width={25}
+                />
+              ) : (
+                ""
+              )}
+            </span>
+
             <Slider {...productSliderSettings}>
               {allProducts.map((data, index) => {
                 if (
@@ -78,7 +96,7 @@ const Home = (props) => {
                         style={{ fontWeight: "700", fontSize: "17px" }}
                       >
                         <Link
-                          to={`/productdetail/${data.Category}/${data.subCategory}/${data.id}/${data.name}/`}
+                          to={`/productdetail/${data.CategoryId.cat_name}/${data.subCategoryId.sub_cat_name}/${data.id}/${data.name}/`}
                         >
                           {" "}
                           {data.name.slice(0, 50) + "..."}{" "}
@@ -130,47 +148,21 @@ const Home = (props) => {
           </div>
         </div>
         {/* ----------------------------------sectionFour-----------allProducts------------------------------ */}
-        {/* <div className="sectionFour ">
-          <div className="row">
-            <div className="col-2 leftSide   ">
-              <h4 className="fs-2">
-                Top Deals on <br /> Samsung
-              </h4>
-              <button className="btn btn-primary btn-md py-2 px-5 mt-4 ">
-                <Link
-                  to={`/productall/Mobiles/Samsung/`}
-                  style={{ textDecoration: "none", color: "#fff" }}
-                >
-                  {" "}
-                  View All{" "}
-                </Link>
-              </button>
-            </div>
-
-            <div className="col-10 rightSide ">
-
-              <ProductCarousel
-                // productsArray={[]}
-                productsArray={allProducts}
-                subCategory="Samsung"
-              />
-
-            </div>
-          </div>
-        </div> */}
-
-
-
+        <CategoryOfferBox
+          productsArray={allProducts}
+          subCategory="Samsung"
+          heading="Samsung"
+        />
         <ProductBox
           // productsArray={[]}
           productsArray={allProducts}
           subCategory="Samsung"
+          isLoading={isLoading}
         />
-
-      <br />  <br />
-       
+        <br /> <br />
+        <br /> <br />
         {/* ------------------------------sectionThree again --------------------------------------------- */}
-        <div className="sectionThree mt-5">
+        <div className="sectionThree mt-0">
           <div className="row">
             <img
               className="col-4"
@@ -189,38 +181,17 @@ const Home = (props) => {
             />
           </div>
         </div>
-        <div className="sectionThree ">
-          <div className="row">
-            <img
-              className="col-4"
-              alt="banner"
-              src="https://rukminim1.flixcart.com/fk-p-flap/656/352/image/c61072b241376138.jpeg?q=70"
-            />
-
-            <img
-              alt="banner"
-              className="col-4"
-              src="https://rukminim1.flixcart.com/fk-p-flap/656/352/image/4c336497ab2e5edd.jpeg?q=70"
-            />
-
-            <img
-              alt="banner"
-              className="col-4"
-              src="https://rukminim2.flixcart.com/fk-p-flap/656/352/image/f20f854a6cb83576.png?q=70"
-            />
-          </div>
-        </div>
+        <CategoryOfferBox
+          productsArray={allProducts}
+          subCategory="Samsung"
+          heading="Apple"
+        />
         {/* ----------------------------------sectionFour----------------------------------------- */}
-
-
-
         <ProductBox
           // productsArray={[]}
           productsArray={allProducts}
-          subCategory="Vivo"
+          subCategory="Apple"
         />
-
-      
         <br /> <br />
       </div>{" "}
       {/* .selfcontainer  */}

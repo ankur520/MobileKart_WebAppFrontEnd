@@ -20,12 +20,17 @@ import { AiFillHome } from "react-icons/ai";
 import { AiOutlineLink } from "react-icons/ai";
 import { FaRupeeSign, FaPercentage } from "react-icons/fa";
 import { BiLinkAlt } from "react-icons/bi";
+
+// pages import
 import ProductEdit from "../Components/vendor/ProductEdit";
 import RecycleBin from "../Components/vendor/Recycle-Bin";
-
 import PlacedOrdersList from "../Components/vendor/PlacedOrdersList";
 
+import { backendApis } from "../Utils/APIS";
+
 const VendorDashboard = () => {
+  // console.log( "vendorDashboard" , backendApis)
+
   let fetchedId, fetchedEmail, fetchedIsLogged, fetchedName;
   const [vendorFullName, setfullName] = useState("");
   const [vendorEmail, setvendorEmail] = useState("");
@@ -46,12 +51,12 @@ const VendorDashboard = () => {
   const fetchTokenFromLocal = () => {
     // token not available go back
     if (!localStorage.getItem("vendorLoginToken")) {
-      console.log("vendor token is null go back ");
+      // console.log("vendor token is null go back ");
       navigation("/");
 
       // setisVendorLogged(false);
     } else {
-      console.log("Welcome Vendor token Exist ");
+      // console.log("Welcome Vendor token Exist ");
       let decoded = jwtDecode(vendorToken);
       // console.log("toeken is " , decoded )
 
@@ -83,26 +88,9 @@ const VendorDashboard = () => {
     fetchTokenFromLocal();
   }, []);
 
-  const djangoVendorAPi = {
-    addCategory: "http://localhost:8000/vendorApi/addcategory",
-    subCategory: "http://localhost:8000/vendorApi/add-sub-category",
-    addTaxes: "http://localhost:8000/vendorApi/add-tax",
-    addShipping: "http://localhost:8000/vendorApi/add-shipping",
-    getSubCatByCat: "http://localhost:8000/vendorApi/get-subcat-bycategory/",
-    signup: "http://localhost:8000/vendorApi/signup",
-    addProduct: "http://localhost:8000/vendorApi/addproduct",
-    setFeaturedProductById:
-      "http://localhost:8000/vendorApi/set-featuredProduct-byId/",
-    updateProduct: "http://localhost:8000/vendorApi/update-productdetail-byId/",
-    deleteProduct: "http://localhost:8000/vendorApi/delete-product-byId/",
-    duplicateProduct: "http://localhost:8000/vendorApi/duplicate-product-byId/",
-    permanentDeleteProduct:
-      "http://localhost:8000/vendorApi/permanent-delete-product-byId/",
-  };
-
   return (
     <>
-      <div className="vendor"  data-cy='vendorDashboardJunction' >
+      <div className="vendor" data-cy="vendorDashboardJunction">
         <div className="topSide d-flex justify-content-between align-items-center">
           <div className="left  ">
             <h3>
@@ -114,11 +102,7 @@ const VendorDashboard = () => {
           </div>
 
           <div className="right d-flex flex-row justify-content-end align-self-center">
-            <Link to="#"> TOP </Link>
             <Link to="#"> Home 1 </Link>
-            <Link to="#"> Home 2 </Link>
-            <Link to="#"> Home 3 </Link>
-            <Link to="#"> Home 4</Link>
 
             <div className="dropDown">
               <Link to="#" className="dropbtn">
@@ -216,7 +200,12 @@ const VendorDashboard = () => {
               Recycle Bin
             </Link>
 
-            <Link to="#" onClick={logOutbtnOnClick} title="Logout" data-cy='vendorDashboardLogoutBtn' >
+            <Link
+              to="#"
+              onClick={logOutbtnOnClick}
+              title="Logout"
+              data-cy="vendorDashboardLogoutBtn"
+            >
               <span>
                 <AiFillHome />
               </span>
@@ -258,7 +247,6 @@ const VendorDashboard = () => {
                   path="/addproduct"
                   element={
                     <AddProduct
-                      APIS={djangoVendorAPi}
                       vendorFullName={vendorFullName}
                       vendorEmail={vendorEmail}
                       vendorId={vendorId}
@@ -273,15 +261,11 @@ const VendorDashboard = () => {
                       vendorFullName={vendorFullName}
                       vendorEmail={vendorEmail}
                       vendorId={vendorId}
-                      APIS={djangoVendorAPi}
                     />
                   }
                 ></Route>
 
-                <Route
-                  path="/addtax"
-                  element={<AddTax APIS={djangoVendorAPi} />}
-                >
+                <Route path="/addtax" element={<AddTax />}>
                   {" "}
                 </Route>
 
@@ -292,7 +276,6 @@ const VendorDashboard = () => {
                       vendorFullName={vendorFullName}
                       vendorEmail={vendorEmail}
                       vendorId={vendorId}
-                      APIS={djangoVendorAPi}
                     />
                   }
                 ></Route>
@@ -304,7 +287,6 @@ const VendorDashboard = () => {
                       vendorFullName={vendorFullName}
                       vendorEmail={vendorEmail}
                       vendorId={vendorId}
-                      APIS={djangoVendorAPi}
                     />
                   }
                 ></Route>
@@ -316,7 +298,6 @@ const VendorDashboard = () => {
                       vendorFullName={vendorFullName}
                       vendorEmail={vendorEmail}
                       vendorId={vendorId}
-                      APIS={djangoVendorAPi}
                     />
                   }
                 ></Route>

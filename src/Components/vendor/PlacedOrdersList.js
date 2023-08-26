@@ -3,33 +3,42 @@ import React from "react";
 import { BsFillImageFill, BsFillStarFill, BsStar } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-
+import { backendApis } from "../../Utils/APIS";
 import { useNavigate } from "react-router-dom";
+import jwtDecode from "jwt-decode";
+import ReactLoading from "react-loading";
 
 const AllProducts = (props) => {
+  // console.log(props)
+
   const navigation = useNavigate();
 
   const [placedOrderList, setplacedOrderList] = useState([]);
+  const [isLoading, setisLoading] = useState(false);
 
-  const fetchFromDb = () => {
+  const fetchFromDb = async () => {
     // console.log("------fetchFromDb------")
+    setisLoading(true);
 
-    axios
-      .get("http://localhost:8000/userApi/placeOrder/")
+    if (localStorage.getItem("vendorLoginToken")) {
+      let decode = jwtDecode(localStorage.getItem("vendorLoginToken"));
 
-      .then(function (response) {
-        if (response.data.status === 200) {
-          // console.log("addProductGETRequest")
-          // console.log( response.data.getPlacedOrdersList )
-          setplacedOrderList(response.data.getPlacedOrdersList);
-        } else {
-          // console.log("27 Else -" , response)
-        }
-      })
+      let sessionUrl =
+        backendApis.vendorApi.getPlacedOrders + decode["fetchedId"] + "/";
 
-      .catch(function (error) {
-        //   console.log("Axios Error " , error )
-      });
+      await axios
+        .get(sessionUrl)
+
+        .then(function (response) {
+          // console.log(response.data)
+          if (response.data.status === 200) {
+            // console.log("addProductGETRequest")
+            // console.log( response.data.getPlacedOrdersList )
+            setplacedOrderList(response.data.data);
+            setisLoading(false);
+          }
+        });
+    }
   };
 
   useEffect(() => {
@@ -41,82 +50,98 @@ const AllProducts = (props) => {
   return (
     <>
       <div id="allproduct">
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Products List</th>
-              <th scope="col">Total Payment</th>
-              <th scope="col">Payment Mode</th>
-              <th scope="col">Payment Id</th>
-              <th scope="col">Tracking No</th>
-              <th scope="col">Address Id</th>
-              <th scope="col">User ID</th>
+        <span data-cy="isLoading">
+          {isLoading ? (
+            <ReactLoading
+              type="spinningBubbles"
+              color="#2874f0"
+              height={50}
+              width={50}
+            />
+          ) : (
+            ""
+          )}
+        </span>
 
-              <th scope="col">Status</th>
+        <div className="table-responsive">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">S.No</th>
+                <th scope="col">
+                  <BsFillImageFill />
+                </th>
+                <th scope="col">Product Name</th>
 
-              <th scope="col"> Date </th>
-            </tr>
-          </thead>
+                <th scope="col">Total Cart Amount</th>
+                <th scope="col">Payment</th>
+                <th scope="col"> Delivery Address </th>
+                <th scope="col"> Vendor Details </th>
+                <th scope="col"> Date </th>
+              </tr>
+            </thead>
 
-          <tbody>
-            {placedOrderList.map((data, index) => {
-              // console.log("dsfa- ", typeof(data.productsArray) , data.productsArray )
+            <tbody>
+              {placedOrderList.map((data, index) => {
+                // console.log(data.recycleBin)
 
-              let convertStringIntoJSON = eval(data.productsArray);
+                {
+                  return (
+                    <tr key={data.id}>
+                      <td>
+                        <p className="productName"> {index + 1} </p>
+                      </td>
 
-              return (
-                <tr key={index}>
-                  <td className="category"> {data.id} </td>
-
-                  <td>
-                    <div className="productName">
-                      <div className="belowProductName">
-                        <div>
-                          {" "}
-                          {convertStringIntoJSON.map((data, index) => {
-                            return (
-                              <p key={index} className="productName">
-                                {" "}
-                                <b>
-                                  {" "}
-                                  Cart Id - {data.cartId} QTY - {data.qty}{" "}
-                                </b>{" "}
-                              </p>
-                            );
-                          })}{" "}
+                      <td scope="row">
+                        <div className="productImage">
+                          <Link
+                            to={`/productdetail/${data.productId.CategoryId.cat_name}/${data.productId.subCategoryId.sub_cat_name}/${data.productId.id}/${data.productId.name}/`}
+                          >
+                            <img
+                              src={data.productId.image1}
+                              style={{ width: "50px", height: "50px" }}
+                            />
+                          </Link>
                         </div>
-                      </div>
-                    </div>
-                  </td>
-                  {/* (e) => deleteTheProduct(e, props.vendorId, data.id) */}
-                  <td className="stock fs-5 ">
-                    {" "}
-                    <span>₹</span> {data.cartAmount}{" "}
-                  </td>
-                  <td className="category"> {data.paymentMode} </td>
+                      </td>
 
-                  <td className="category"> XXXXXX {data.paymentId} </td>
+                      <td>
+                        <p className="productName">
+                          <Link
+                            to={`/productdetail/${data.productId.CategoryId.cat_name}/${data.productId.subCategoryId.sub_cat_name}/${data.productId.id}/${data.productId.name}/`}
+                          >
+                            {data.productId.name.substring(0, 20) + "..."}
+                          </Link>
+                        </p>
+                      </td>
 
-                  <td className="category"> {data.trackingNo} </td>
+                      <td className="category">
+                        {data.placeOrderId.cartAmount}
+                      </td>
 
-                  <td className="category"> {data.addressId_id} </td>
-                  <td className="category"> {data.userId_id} </td>
+                      <td className="category">
+                        {data.placeOrderId.paymentMode}
+                      </td>
 
-                  <td className="category"> {data.status} </td>
+                      <td className="category">
+                        {data.placeOrderId.addressId.city}{" "}
+                        {data.placeOrderId.addressId.state}
+                      </td>
 
-                  <td className="publish">
-                    <p>Placed Date</p>
-                    <p className="date"> {data.date.toLocaleString()} </p>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                      <td className="category">
+                        {" "}
+                        {data.productId.venId.ven_email}{" "}
+                      </td>
+
+                      <td className="category"> {data.productId.date}</td>
+                    </tr>
+                  );
+                }
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
-
-      {(() => {})()}
     </>
   );
 };

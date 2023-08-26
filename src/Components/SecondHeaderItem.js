@@ -5,16 +5,20 @@ const SecondHeaderItem = (props) => {
   return (
     <>
       <div className="categoryBox">
-        <a href="#">
+        <Link
+          to={`http://localhost:3000/productall/Mobiles/${props.subCategoryName}/`}
+        >
           <div className="categoryImage">
             <img src={props.imageUrl} alt={props.subCategoryName} />
           </div>
-          <Link
-            to={`http://localhost:3000/productall/Mobiles/${props.subCategoryName}/`}
-          >
-            <p className="shopCategory" title={props.subCategoryName} >{props.subCategoryName}</p>
-          </Link>
-        </a>
+        </Link>
+        <Link
+          to={`http://localhost:3000/productall/Mobiles/${props.subCategoryName}/`}
+        >
+          <p className="shopCategory" title={props.subCategoryName}>
+            {props.subCategoryName}
+          </p>
+        </Link>
       </div>
     </>
   );

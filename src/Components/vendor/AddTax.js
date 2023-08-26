@@ -4,6 +4,10 @@ import { FaRupeeSign, FaPercentage } from "react-icons/fa";
 import { BiLinkAlt } from "react-icons/bi";
 import axios from "axios";
 
+import ReactLoading from "react-loading";
+
+import { backendApis } from "../../Utils/APIS";
+
 const AddTax = (props) => {
   const [category, setcategory] = useState("");
   const [catDropdown, setcatDropdown] = useState("");
@@ -15,6 +19,7 @@ const AddTax = (props) => {
 
   // to fetch from backend
   const [getCategory, setgetCategory] = useState([]);
+  const [isLoading, setisLoading] = useState(false);
 
   const inputOnChange = (e) => {
     if (e.target.name === "categoryNamee") {
@@ -47,83 +52,60 @@ const AddTax = (props) => {
   };
 
   // ADD CATEGORY
-  const categoryOnSubmit = (e) => {
+  const categoryOnSubmit = async (e) => {
     e.preventDefault();
-
-    // console.log("categoryOnClick")
-    // console.log("cat " + category)
-    // console.log(djangoVendorAPi.addCategory)
 
     let cat_name = category;
 
-    axios
-      .post(props.APIS.addCategory, {
+    await axios
+      .post(backendApis.vendorApi.addcategory, {
         cat_name,
       })
 
       .then(function (response) {
-        // console.log(response)
-        // console.log(response.data.msg)
+        if (response.data.status === 200) {
+          if (response.data.msg === "CategoryAdded") {
+            alert("Category Added");
+          } else {
+            alert(response.data.msg);
+          }
 
-        if (response.data.msg === "CategoryAdded") {
-          alert("Category Added");
-          setcategory(" ");
-        } else {
-          alert(response.data.msg);
+          setcategory("");
+          getCategoryFromDjango();
         }
-      })
-
-      .catch(function (error) {
-        console.log("Your Error- " + error);
-        alert("Axios ERROR");
       });
   };
 
   // subCategoryOnSubmit
 
-  const subCategoryOnSubmit = (e) => {
+  const subCategoryOnSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("subCategoryOnSubmit");
-    console.log("catDropdown- ", catDropdown);
-    console.log("subCatName- ", subCatName);
-
     let catId = catDropdown[0];
-    let cat_name = catDropdown.slice(1);
     let sub_cat_name = subCatName;
 
-    // console.log("catId- " , catId )
-    // console.log("cat_name- " , cat_name)
-    // console.log("sub_cat_name- " , sub_cat_name)
-
-    axios
-      .post(props.APIS.subCategory, {
+    await axios
+      .post(backendApis.vendorApi.add_sub_category, {
         catId,
-        cat_name,
         sub_cat_name,
       })
 
-      .then(function (response) {
-        if (response.data.msg === "SubCategoryAdded") {
-          alert("SubCategoryAdded");
-        } else {
-          alert(response.data.msg);
+      .then(
+        await function (response) {
+          if (response.data.status === 200) {
+            if (response.data.msg === "SubCategoryAdded") {
+              alert("SubCategoryAdded");
+              setsubCatName("");
+            } else {
+              alert(response.data.msg);
+            }
+          }
         }
-      })
-
-      .catch(function (error) {
-        console.log("AXIOS ERROR ", error);
-      });
-
-    // console.log(cat_name[0])
+      );
   };
 
-  const taxOnSubmit = (e) => {
+  const taxOnSubmit = async (e) => {
     e.preventDefault();
-
-    // console.log("subCategoryOnSubmit")
-    // console.log("catDropdown- " , catDropdown )
-    // console.log("subCatName- " , subCatName)
 
     let tax_name = taxName;
     let tax_value = taxValue;
@@ -132,33 +114,33 @@ const AddTax = (props) => {
     // console.log("cat_name- " , cat_name)
     // console.log("sub_cat_name- " , sub_cat_name)
 
-    axios
-      .post(props.APIS.addTaxes, {
+    await axios
+      .post(backendApis.vendorApi.add_tax, {
         tax_name,
         tax_value,
       })
 
-      .then(function (response) {
-        if (response.data.msg === "TaxClassAdded") {
-          alert("TaxClassAdded");
-        } else {
-          alert(response.data.msg);
+      .then(
+        await function (response) {
+          if (response.data.status === 200) {
+            if (response.data.msg === "TaxClassAdded") {
+              alert("TaxClassAdded");
+              settaxName("");
+              settaxValue("");
+            } else {
+              alert(response.data.msg);
+            }
+          }
         }
-      })
-
-      .catch(function (error) {
-        console.log("AXIOS ERROR ", error);
-      });
+      );
 
     // console.log(cat_name[0])
   };
 
-  const shippingOnSubmit = (e) => {
+  const shippingOnSubmit = async (e) => {
     e.preventDefault();
 
-    // console.log("subCategoryOnSubmit")
-    // console.log("catDropdown- " , catDropdown )
-    // console.log("subCatName- " , subCatName)
+    // console.log("shippingOnSubmit");
 
     let shipping_state_name = shippingName;
     let shipping_value = shippingValue;
@@ -167,46 +149,44 @@ const AddTax = (props) => {
     // console.log("cat_name- " , cat_name)
     // console.log("sub_cat_name- " , sub_cat_name)
 
-    axios
-      .post(props.APIS.addShipping, {
+    await axios
+      .post(backendApis.vendorApi.add_shipping, {
         shipping_state_name,
         shipping_value,
       })
 
-      .then(function (response) {
-        setshippingName(" ");
-        setshippingValue(" ");
-
-        if (response.data.msg === "ShippingStateNameAdded") {
-          alert("ShippingStateNameAdded");
-        } else {
-          alert(response.data.msg);
+      .then(
+        await function (response) {
+          if (response.data.status === 200) {
+            if (response.data.msg === "ShippingStateNameAdded") {
+              alert("ShippingStateNameAdded");
+              setshippingName("");
+              setshippingValue("");
+            } else {
+              alert(response.data.msg);
+            }
+          }
         }
-      })
-
-      .catch(function (error) {
-        console.log("AXIOS ERROR ", error);
-      });
+      );
   };
 
   // GET CATEGORY FROM DATABASE
-  const getCategoryFromDjango = () => {
-    axios
-      .get(props.APIS.addCategory)
+  const getCategoryFromDjango = async () => {
+    setisLoading(true);
+    await axios
+      .get(backendApis.vendorApi.addcategory)
 
-      .then(function (response) {
-        // console.log(response.data)
+      .then(
+        await function (response) {
+          // console.log(response.data)
 
-        if (response.data.msg === "CategoryGETREQUEST") {
-          // console.log("GET Request WORKING")
-          setgetCategory(response.data.fetchCategory);
+          if (response.data.msg === "CategoryGETREQUEST") {
+            // console.log("GET Request WORKING")
+            setgetCategory(response.data.fetchCategory);
+            setisLoading(false);
+          }
         }
-      })
-
-      .catch(function (error) {
-        console.log("ERROR IS- ", error);
-        alert("ERROR");
-      });
+      );
   };
 
   useEffect(() => {
@@ -255,7 +235,18 @@ const AddTax = (props) => {
               aria-controls="nav-contact"
               aria-selected="false"
             >
-              Images
+              <span data-cy="isLoading">
+                {isLoading ? (
+                  <ReactLoading
+                    type="spinningBubbles"
+                    color="#2874f0"
+                    height={25}
+                    width={25}
+                  />
+                ) : (
+                  ""
+                )}
+              </span>
             </button>
             {/* <button className="nav-link" id="nav-disabled-tab" data-bs-toggle="tab" data-bs-target="#nav-disabled" type="button" role="tab" aria-controls="nav-disabled" aria-selected="false" disabled>Disabled</button> */}
           </div>
@@ -284,6 +275,7 @@ const AddTax = (props) => {
                         name="categoryNamee"
                         className="form-control  "
                         id="floatingInputCategory"
+                        value={category}
                         placeholder="Username"
                         onChange={inputOnChange}
                         required
@@ -345,6 +337,7 @@ const AddTax = (props) => {
                         id="floatingInputGroup1"
                         placeholder="Username"
                         onChange={inputOnChange}
+                        value={subCatName}
                         name="subCatName"
                         required
                       />
@@ -387,6 +380,7 @@ const AddTax = (props) => {
                         id="floatingInputGroup1"
                         required
                         name="taxName"
+                        value={taxName}
                         onChange={inputOnChange}
                         placeholder=" "
                       />
@@ -410,6 +404,7 @@ const AddTax = (props) => {
                         id="floatingInputGroup1"
                         placeholder=" "
                         required
+                        value={taxValue}
                         name="taxValue"
                         onChange={inputOnChange}
                       />
@@ -442,6 +437,7 @@ const AddTax = (props) => {
                         id="floatingInputGroup1"
                         required
                         name="ShippingName"
+                        value={shippingName}
                         onChange={inputOnChange}
                         placeholder=" "
                       />
@@ -463,6 +459,7 @@ const AddTax = (props) => {
                         type="number"
                         className="form-control"
                         id="floatingInputGroup1"
+                        value={shippingValue}
                         required
                         name="shippingValue"
                         onChange={inputOnChange}

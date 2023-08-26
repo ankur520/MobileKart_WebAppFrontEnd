@@ -25,7 +25,13 @@ const Banner = (props) => {
           className="each-slide-effect"
           key={index}
         >
-          <div style={{ backgroundImage: `url( ${data}  )` }}></div>
+          <img
+            className="img-fluid"
+            alt="Image Banner"
+            src={data}
+            style={{ width: "100%", height: "300px", objectFit: "" }}
+          />
+          {/* <div style={{ backgroundImage: `url( ${data}  )` }}></div> */}
         </div>
       );
     });

@@ -3,287 +3,317 @@ import React from "react";
 import { BsFillImageFill, BsFillStarFill, BsStar } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-
+import ReactLoading from "react-loading";
 import { useNavigate } from "react-router-dom";
+
+import { backendApis } from "../../Utils/APIS";
 
 const AllProducts = (props) => {
   const navigation = useNavigate();
 
   const [allProducts, setallProducts] = useState([]);
+  const [isLoading, setisLoading] = useState(false);
 
-  const fetchFromDb = () => {
+  const fetchFromDb = async () => {
     // console.log("------fetchFromDb------")
+    setisLoading(true);
+    await axios
+      .get(backendApis.vendorApi.addproduct)
 
-    axios
-      .get(props.APIS.addProduct)
-
-      .then(function (response) {
-        if (response.data.msg === "addProductGETRequest") {
-          // console.log("addProductGETRequest")
-          // console.log(response.data.getAllProducts)
-          setallProducts(response.data.getAllProducts);
-        } else {
-          console.log("27 Else -", response);
+      .then(
+        await function (response) {
+          if (response.data.msg === "addProductGETRequest") {
+            // console.log("addProductGETRequest")
+            // console.log(response.data.getAllProducts)
+            setallProducts(response.data.getAllProducts);
+            setisLoading(false);
+          } else {
+            // console.log("27 Else -", response);
+          }
         }
-      })
-
-      .catch(function (error) {
-        console.log("Axios Error ", error);
-      });
+      );
   };
 
-  const featuredProductOnClick = (e, productId, msg) => {
+  const featuredProductOnClick = async (e, productId, msg) => {
     // console.log( productId , msg )
 
     let sessionUrl =
-      props.APIS.setFeaturedProductById + productId + "/" + msg + "/";
+      backendApis.vendorApi
+        .set_featuredProduct_byIdByProductIdAndFeaturedStatus +
+      productId +
+      "/" +
+      msg +
+      "/";
     // console.log(sessionUrl)
 
-    axios
+    await axios
       .put(sessionUrl)
 
-      .then(function (response) {
-        if (response.data.status === 200) {
-          // console.log(response.data.status )
-          alert(response.data.msg);
-          // navigation("/vendor/allproducts")
-          window.location.replace("/vendor/allproducts");
-          // return <Navigate to="/vendor" replace={true} />
+      .then(
+        await function (response) {
+          if (response.data.status === 200) {
+            // console.log(response.data.status )
+            alert(response.data.msg);
+            // navigation("/vendor/allproducts")
+            // window.location.replace("/vendor/allproducts");
+            fetchFromDb();
+          }
         }
-      })
-
-      .catch(function (error) {
-        console.log("Error- ", error);
-      });
+      );
   };
 
   useEffect(() => {
     // console.log("--UseEffect---");
 
     fetchFromDb();
-  }, []);
+  }, [navigation]);
 
-  const deleteTheProduct = (e, vendorId, productId) => {
+  const deleteTheProduct = async (e, vendorId, productId) => {
     // console.log(e.target , vendorId,  productId )
 
     // console.log("vendorId- "  , vendorId )
     // console.log("productId- "  , productId )
 
     let sessionUrl =
-      props.APIS.deleteProduct + vendorId + "/" + productId + "/";
+      backendApis.vendorApi.delete_product_byIdByVendorIdAndProductId +
+      vendorId +
+      "/" +
+      productId +
+      "/";
 
-    axios
+    await axios
       .delete(sessionUrl)
 
-      .then(function (response) {
-        if (response.data.msg === "Item-Deleted") {
-          alert(response.data.msg);
+      .then(
+        await function (response) {
+          if (response.data.msg === "Item-Deleted") {
+            alert(response.data.msg);
 
-          // navigation("/vendor/allproducts")
-          window.location.replace("/vendor/allproducts");
+            // navigation("/vendor/allproducts")
+            // window.location.replace("/vendor/allproducts");
+            fetchFromDb();
+          }
         }
-      });
+      );
   };
 
-  const duplicateTheProduct = (e, vendorId, productId) => {
-    // console.log(e.target , vendorId,  productId )
-
-    // console.log("vendorId- "  , vendorId )
-    // console.log("productId- "  , productId )
-
+  const duplicateTheProduct = async (e, vendorId, productId) => {
     let sessionUrl =
-      props.APIS.duplicateProduct + vendorId + "/" + productId + "/";
+      backendApis.vendorApi.duplicate_product_byIdByVendorIdAndProductId +
+      vendorId +
+      "/" +
+      productId +
+      "/";
 
-    axios
+    await axios
       .post(sessionUrl)
 
-      .then(function (response) {
-        if (response.data.msg === "DuplicateProductAddedSuccessfully") {
-          alert("DuplicateProductAddedSuccessfully");
-          window.location.replace("/vendor/allproducts");
-        } else {
-          alert(response.data.msg);
+      .then(
+        await function (response) {
+          if (response.data.msg === "DuplicateProductAddedSuccessfully") {
+            alert("DuplicateProductAddedSuccessfully");
+            // window.location.replace("/vendor/allproducts");
+            fetchFromDb();
+          } else {
+            alert(response.data.msg);
+          }
         }
-      });
+      );
   };
 
   return (
     <>
       <div id="allproduct">
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th scope="col">
-                <BsFillImageFill />
-              </th>
-              <th scope="col">Product Name</th>
-              <th scope="col">Stock</th>
-              <th scope="col">Qty</th>
-              <th scope="col">Price</th>
-              <th scope="col">Categories</th>
-              <th scope="col">
-                <BsFillStarFill />
-              </th>
-              <th scope="col"> Date </th>
-            </tr>
-          </thead>
+        <span data-cy="isLoading">
+          {isLoading ? (
+            <ReactLoading
+              type="spinningBubbles"
+              color="#2874f0"
+              height={50}
+              width={50}
+            />
+          ) : (
+            ""
+          )}
+        </span>
 
-          <tbody>
-            {allProducts.map((data) => {
-              // console.log(data.recycleBin)
+        <div className="table-responsive">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">
+                  <BsFillImageFill />
+                </th>
+                <th scope="col">Product Name</th>
+                <th scope="col">Stock</th>
+                <th scope="col">Qty</th>
+                <th scope="col">Price</th>
+                <th scope="col">Categories</th>
+                <th scope="col">
+                  <BsFillStarFill />
+                </th>
+                <th scope="col"> Date </th>
+              </tr>
+            </thead>
 
-              if (
-                data.recycleBin === false &&
-                data.venId_id === props.vendorId
-              ) {
-                return (
-                  <tr key={data.id}>
-                    <td scope="row">
-                      <div className="productImage">
-                        <img
-                          src={data.image1}
-                          style={{ width: "50px", height: "50px" }}
-                        />
-                      </div>
-                    </td>
+            <tbody>
+              {allProducts.map((data) => {
+                // console.log(data.recycleBin)
 
-                    <td>
-                      <p className="productName"> {data.name} </p>
+                if (
+                  data.recycleBin === false &&
+                  data.venId.id === props.vendorId
+                ) {
+                  return (
+                    <tr key={data.id}>
+                      <td scope="row">
+                        <div className="productImage">
+                          <img
+                            src={data.image1}
+                            style={{ width: "50px", height: "50px" }}
+                          />
+                        </div>
+                      </td>
 
-                      {/* <p> fetched vendor ID -  {  data.venId_id }</p>
-                <p> props vendor ID - {  props.vendorId }</p> */}
-
-                      <div className="belowProductName">
-                        <span style={{ color: "#999" }}>
+                      <td>
+                        <p className="productName">
                           {" "}
-                          Id - {data.id}{" "}
-                          <span style={{ color: "#999" }}> {"|"} </span>{" "}
-                        </span>
-                        <span>
-                          {" "}
-                          <Link
-                            to={`/productdetail/${data.Category}/${data.subCategory}/${data.id}/${data.name}/`}
-                          >
-                            {" "}
-                            View{" "}
-                          </Link>{" "}
-                          <span style={{ color: "#999" }}> {"|"} </span>{" "}
-                        </span>
-                        <span>
-                          {" "}
-                          <Link
-                            to={`/vendor/edit/${data.Category}/${data.subCategory}/${data.id}/`}
-                          >
-                            {" "}
-                            Edit{" "}
-                          </Link>{" "}
-                          <span style={{ color: "#999" }}> {"|"} </span>{" "}
-                        </span>
-                        <span>
-                          {" "}
-                          <Link
-                            href="#"
-                            style={{ color: "#b32d2e" }}
-                            onClick={(e) => {
-                              if (
-                                window.confirm(
-                                  "Are you sure want to Delete this Product? "
+                          {data.name.substring(0, 30) + "..."}{" "}
+                        </p>
+
+                        <div className="belowProductName">
+                          <span style={{ color: "#999" }}>
+                            Id - {data.id}
+                            <span style={{ color: "#999" }}> {"|"} </span>
+                          </span>
+                          <span>
+                            <Link
+                              title="Product View"
+                              to={`/productdetail/${data.CategoryId.cat_name}/${data.subCategoryId.sub_cat_name}/${data.id}/${data.name}/`}
+                            >
+                              View
+                            </Link>
+                            <span style={{ color: "#999" }}> {"|"} </span>
+                          </span>
+                          <span>
+                            <Link
+                              title="Edit Product"
+                              to={`/vendor/edit/${data.CategoryId.cat_name}/${data.subCategoryId.sub_cat_name}/${data.id}/`}
+                            >
+                              Edit
+                            </Link>
+                            <span style={{ color: "#999" }}> {"|"} </span>
+                          </span>
+                          <span>
+                            <Link
+                              title="Trash"
+                              href="#"
+                              style={{ color: "#b32d2e" }}
+                              onClick={(e) => {
+                                if (
+                                  window.confirm(
+                                    "Are you sure want to Delete this Product? "
+                                  )
+                                ) {
+                                  deleteTheProduct(e, props.vendorId, data.id);
+                                }
+                              }}
+                            >
+                              Trash
+                            </Link>
+                            <span style={{ color: "#999" }}> {"|"} </span>
+                          </span>
+                          <span>
+                            <Link
+                              title="Duplicate It"
+                              href="#"
+                              onClick={(e) => {
+                                if (
+                                  window.confirm(
+                                    "Are you sure want to Duplicate this Product? "
+                                  )
+                                ) {
+                                  duplicateTheProduct(
+                                    e,
+                                    props.vendorId,
+                                    data.id
+                                  );
+                                }
+                              }}
+                            >
+                              Duplicate
+                            </Link>
+                          </span>
+                        </div>
+                      </td>
+                      {/* (e) => deleteTheProduct(e, props.vendorId, data.id) */}
+                      <td className="stock"> {data.stockStatus} </td>
+                      <td className="category"> {data.totalUnits} </td>
+                      <td className="price">
+                        <p>
+                          <del>
+                            <span>₹</span> {data.mrp.toLocaleString()}
+                          </del>
+                        </p>
+                        <p>
+                          <span>₹</span>
+                          {data.mrp -
+                            parseInt((data.mrp * data.discountPercent) / 100)}
+                        </p>
+                      </td>
+                      <td className="category">
+                        {data.subCategoryId.catId.cat_name} |{" "}
+                        {data.subCategoryId.sub_cat_name}
+                      </td>
+
+                      {(() => {
+                        if (data.setFeatured == 0) {
+                          // not featured
+                          return (
+                            <td
+                              title="Not Featured"
+                              onClick={(e) =>
+                                featuredProductOnClick(
+                                  e,
+                                  data.id,
+                                  "notFeatured"
                                 )
-                              ) {
-                                deleteTheProduct(e, props.vendorId, data.id);
                               }
-                            }}
-                          >
-                            {" "}
-                            Trash{" "}
-                          </Link>{" "}
-                          <span style={{ color: "#999" }}> {"|"} </span>{" "}
-                        </span>
-                        <span>
-                          {" "}
-                          <Link
-                            href="#"
-                            onClick={(e) => {
-                              if (
-                                window.confirm(
-                                  "Are you sure want to Duplicate this Product? "
+                            >
+                              <BsStar />
+                            </td>
+                          );
+                        } else {
+                          // featured
+                          return (
+                            <td
+                              title="Featured Product"
+                              onClick={(e) =>
+                                featuredProductOnClick(
+                                  e,
+                                  data.id,
+                                  "itsFeatured"
                                 )
-                              ) {
-                                duplicateTheProduct(e, props.vendorId, data.id);
                               }
-                            }}
-                          >
-                            {" "}
-                            Duplicate{" "}
-                          </Link>{" "}
-                        </span>
-                      </div>
-                    </td>
-                    {/* (e) => deleteTheProduct(e, props.vendorId, data.id) */}
-                    <td className="stock"> {data.stockStatus} </td>
-                    <td className="category"> {data.totalUnits} </td>
-                    <td className="price">
-                      <p>
-                        <del>
-                          <span>₹</span> {data.mrp.toLocaleString()}
-                        </del>
-                      </p>
-                      <p>
-                        <span>₹</span>{" "}
-                        {data.mrp -
-                          parseInt(
-                            (data.mrp * data.discountPercent) / 100
-                          )}{" "}
-                      </p>
-                    </td>
-                    <td className="category">
-                      {" "}
-                      {data.Category} | {data.subCategory}{" "}
-                    </td>
+                            >
+                              <BsFillStarFill />
+                            </td>
+                          );
+                        }
+                      })()}
 
-                    {(() => {
-                      if (data.setFeatured == 0) {
-                        // not featured
-                        return (
-                          <td
-                            title="Not Featured"
-                            onClick={(e) =>
-                              featuredProductOnClick(e, data.id, "notFeatured")
-                            }
-                          >
-                            {" "}
-                            <BsStar />{" "}
-                          </td>
-                        );
-                      } else {
-                        // featured
-                        return (
-                          <td
-                            title="Featured Product"
-                            onClick={(e) =>
-                              featuredProductOnClick(e, data.id, "itsFeatured")
-                            }
-                          >
-                            {" "}
-                            <BsFillStarFill />{" "}
-                          </td>
-                        );
-                      }
-                    })()}
-
-                    <td className="publish">
-                      <p>Published</p>
-                      <p className="date"> {data.date.toLocaleString()} </p>
-                    </td>
-                  </tr>
-                );
-              }
-            })}
-          </tbody>
-        </table>
+                      <td className="publish">
+                        <p>Published</p>
+                        <p className="date"> {data.date.toLocaleString()} </p>
+                      </td>
+                    </tr>
+                  );
+                }
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
-
-      {(() => {})()}
     </>
   );
 };

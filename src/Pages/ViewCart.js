@@ -1,15 +1,18 @@
 import React, { useState } from "react";
-import Slider from "react-slick";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import jwtDecode from "jwt-decode";
+import { backendApis } from "../Utils/APIS";
+import ReactLoading from "react-loading";
 
 const Cart = (props) => {
   const navigate = useNavigate();
 
-  // console.log("PROPS- ", props )
+  // console.log("PROPS- ", props);
+
+  const [isLoading, setisLoading] = useState(false);
 
   const [fetchCart, setfetchCart] = useState([]);
   const [fetchAddress, setfetchAddress] = useState([]);
@@ -29,36 +32,38 @@ const Cart = (props) => {
   var totalCartTax = 0;
   var totalPayableAmount = 0;
 
-  const fetchCartById = (userId) => {
-    // let sessionUrl = "http://localhost:8000/userApi/fetch-cart-byUserId/60/";
+  const fetchCartById = async (userId) => {
+    setisLoading(true);
+    let sessionUrl = `${backendApis.userApi.fetch_cart_byUserIdByUserId}${userId}/`;
 
-    let sessionUrl = `http://localhost:8000/userApi/fetch-cart-byUserId/${userId}/`;
-
-    axios
+    await axios
       .get(sessionUrl)
 
       .then(function (response) {
-        // console.log("dataArray- ", response.data.cartFullArray);
-
-        // console.log("length- " , response.data.cartFullArray.length )
-
         // to prevent from error in front end  we validated here
-        if (response.data.cartFullArray.length > 0) {
-          setfetchCart(response.data.cartFullArray);
+        if (response.data.status === 200) {
+          if (response.data.msg === "Cart data Available") {
+            if (response.data.cartFullArray.length > 0) {
+              setfetchCart(response.data.cartFullArray);
+              setisLoading(false);
+              // console.log( response.data.cartFullArray )
+            }
+          }
+
+          if (response.data.msg === "Cart is Empty") {
+            setfetchCart([]);
+            setisLoading(false);
+          }
+
+          setloading(false);
         }
-
-        setloading(false);
-      })
-
-      .catch(function (error) {
-        // console.log("Fetch Cart Error ", error);
       });
   };
 
-  const fetchAddressById = (userId) => {
-    let sessionUrl = `http://localhost:8000/userApi/add-address/${userId}/`;
+  const fetchAddressById = async (userId) => {
+    let sessionUrl = `${backendApis.userApi.add_addressByUserId}${userId}/`;
 
-    axios
+    await axios
       .get(sessionUrl)
 
       .then(function (response) {
@@ -66,11 +71,10 @@ const Cart = (props) => {
 
         if (response.data.dataArray.length > 0) {
           setfetchAddress(response.data.dataArray);
+          // console.log( response.data.dataArray )
+        } else {
+          setfetchAddress([]);
         }
-      })
-
-      .catch(function (error) {
-        // console.log("fetch Address Error- ", error)
       });
   };
 
@@ -81,14 +85,11 @@ const Cart = (props) => {
       navigate("/");
     }
 
-    // console.log("Cart Page use Effet " , props.loggedUserInfo.fetchedId )
+    let decoded = jwtDecode(localStorage.getItem("userLoginToken"));
 
-    fetchCartById(props.loggedUserInfo.fetchedId);
-    // fetchCartById(60);
-
-    fetchAddressById(props.loggedUserInfo.fetchedId);
-    // fetchAddressById( 60 );
-  }, [props]);
+    fetchCartById(decoded["fetchedId"]);
+    fetchAddressById(decoded["fetchedId"]);
+  }, [props, navigate]);
 
   const inputOnChange = (e) => {
     if (e.target.name === "productQtyInput") {
@@ -100,34 +101,35 @@ const Cart = (props) => {
     }
   };
 
-  function updateCartQty(cartId, slugName) {
-    let sessionUrl = `http://localhost:8000/userApi/update-cartqty-byproductid/${cartId}/${slugName}/`;
+  const updateCartQty = async (cartId, slugName) => {
+    let sessionUrl = `${backendApis.userApi.update_cartqty_byproductidByCartIdAndQtyMessage}${cartId}/${slugName}/`;
     // console.log(sessionUrl)
 
-    axios
+    await axios
       .put(sessionUrl)
 
       .then(function (resposne) {
         // alert(resposne.data.msg)
-      })
-      .catch(function (error) {
-        // console.log("Error- ", error  )
       });
-  }
+  };
 
-  const plusBtnOnClick = (cart_id) => {
-    // console.log("plusBtnOnClick" , cart_id )
+  const plusBtnOnClick = (cart_id, currQty, maxQtyLimit) => {
+    // console.log("plusBtnOnClick", cart_id, currQty, maxQtyLimit);
 
-    setfetchCart((fetchCart) =>
-      fetchCart.map(
-        (item) =>
-          cart_id === item.id
-            ? { ...item, qty: item.qty + (item.qty < 10 ? 1 : 0) }
-            : item
-        // console.log( "inside- "  , item  )
-      )
-    );
-    updateCartQty(cart_id, "incremented");
+    if (currQty < maxQtyLimit) {
+      setfetchCart((fetchCart) =>
+        fetchCart.map(
+          (item) =>
+            cart_id === item.id
+              ? { ...item, qty: item.qty + (item.qty < maxQtyLimit ? 1 : 0) }
+              : item
+          // console.log( "inside- "  , item  )
+        )
+      );
+      updateCartQty(cart_id, "incremented");
+    } else {
+      alert("You can't add more than Stock qty");
+    }
   };
 
   const minusBtnOnClick = (cart_id) => {
@@ -148,35 +150,35 @@ const Cart = (props) => {
     updateCartQty(cart_id, "decremented");
   };
 
-  const deleteCartItem = (e, userId, cartId) => {
+  const deleteCartItem = async (e, userId, cartId) => {
     e.preventDefault();
 
     const thisClicked = e.currentTarget;
     thisClicked.innerText = "Removing";
 
-    let sessionUrl = `http://localhost:8000/userApi/delete-cartItem/${userId}/${cartId}/`;
+    let sessionUrl = `${backendApis.userApi.delete_cartItemByUserIdAndCartId}${userId}/${cartId}/`;
 
-    // console.log("deletebtn- " , sessionUrl)
+    // console.log( userId , "  >  " ,  cartId )
 
-    axios
+    await axios
       .delete(sessionUrl)
 
       .then(function (response) {
         if (response.data.msg === "CartItemDeleted") {
           alert(response.data.msg);
-          thisClicked.closest("#removeTheElement").remove();
+          // thisClicked.closest("#removeTheElement").remove();
+          navigate("/viewcart");
+
+          let decoded = jwtDecode(localStorage.getItem("userLoginToken"));
+          fetchCartById(decoded["fetchedId"]);
         } else {
           alert(response.data.msg);
         }
-      })
-
-      .catch(function (error) {
-        // console.log("Error- " , error )
       });
   };
 
   const radioOnClick = (e, addressId) => {
-    console.log("dsfasdf");
+    // console.log("dsfasdf");
     const thisBtn = e.currentTarget;
   };
 
@@ -193,11 +195,11 @@ const Cart = (props) => {
       // console.log("201- " , data.userId_id[0][0].u_email )
 
       // Shipping types and Charges
-      var shippingStatus = data.productKey[0].shippingStatus;
+      var shippingStatus = data.productId.shippingStatus;
 
       switch (shippingStatus) {
         case "flatShipping":
-          deliveryCharges = data.productKey[0].shippingAmount;
+          deliveryCharges = data.productId.shippingAmount;
           break;
 
         case "locationWise":
@@ -209,10 +211,10 @@ const Cart = (props) => {
       }
 
       // Shipping types and Charges
-      var taxStatus = data.productKey[0].taxStatus;
+      var taxStatus = data.productId.taxStatus;
 
       if (taxStatus === "taxable") {
-        TaxClass = data.productKey[0].taxClass;
+        TaxClass = data.productId.taxClass;
         var stringToNo = TaxClass.match(/(\d+)/);
         TaxPercent = stringToNo[0];
       } else {
@@ -222,22 +224,19 @@ const Cart = (props) => {
 
       // total cart value
       totalCartValue +=
-        (data.productKey[0].mrp -
+        (data.productId.mrp -
           parseInt(
-            (data.productKey[0].mrp * data.productKey[0].discountPercent) / 100
+            (data.productId.mrp * data.productId.discountPercent) / 100
           )) *
         data.qty;
       // total saving on cart
       totalCartSavings +=
-        parseInt(
-          (data.productKey[0].mrp * data.productKey[0].discountPercent) / 100
-        ) * data.qty;
+        parseInt((data.productId.mrp * data.productId.discountPercent) / 100) *
+        data.qty;
       // calculate amount after discount
       finalAmountAfterDiscount =
-        data.productKey[0].mrp -
-        parseInt(
-          (data.productKey[0].mrp * data.productKey[0].discountPercent) / 100
-        );
+        data.productId.mrp -
+        parseInt((data.productId.mrp * data.productId.discountPercent) / 100);
       // calculate tax for each product on amount
       TaxesCharges = ((finalAmountAfterDiscount * TaxPercent) / 100) * data.qty;
 
@@ -252,17 +251,19 @@ const Cart = (props) => {
             <div className="cardBox d-flex " style={{ padding: "10px 0" }}>
               <div style={{ textAlign: "center" }}>
                 <img
-                  src={data.productKey[0].image1}
+                  title="Product Image"
+                  alt={data.productId.name}
+                  src={data.productId.image1}
                   style={{ width: "100px", height: "120px" }}
                 />
                 {/* <p> id - {data.id}</p>
               <p> productId_id - {data.id}</p>
-              <p> user - {data.userKey[0].id } -- {data.userKey[0].u_email } </p> */}
+              <p> user - {data.userId.id } -- {data.userId.u_email } </p> */}
 
                 <div className="mt-3">
-                  <div className=" d-flex justify-content-between ">
+                  <div className=" ">
                     <div
-                      className="input-group d-flex w-auto justify-content-center align-items-center  "
+                      className="d-flex w-auto justify-content-center align-items-center  "
                       id="elementId+'${index}'"
                     >
                       <input
@@ -277,6 +278,7 @@ const Cart = (props) => {
                           width: "2rem",
                           height: "2rem",
                         }}
+                        title="Decrease Qty"
                         value="-"
                         className="button-minus border rounded-circle  mx-2 "
                         data-field="quantity"
@@ -290,11 +292,18 @@ const Cart = (props) => {
                         style={{ border: "1px solid #ddd" }}
                         step="1"
                         max="10"
+                        title="Product Qty"
                         className="quantity-field text-center w-25"
                       />
                       <input
                         type="button"
-                        onClick={() => plusBtnOnClick(data.id)}
+                        onClick={() =>
+                          plusBtnOnClick(
+                            data.id,
+                            data.qty,
+                            data.productId.totalUnits
+                          )
+                        }
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
@@ -304,6 +313,7 @@ const Cart = (props) => {
                           width: "2rem",
                           height: "2rem",
                         }}
+                        title="Increase Qty"
                         value="+"
                         className="button-plus border rounded-circle mx-2 "
                         data-field="quantity"
@@ -313,17 +323,11 @@ const Cart = (props) => {
                 </div>
               </div>
 
-              <div className="">
-                <p
-                  style={{
-                    color: "#212121",
-                    fontSize: "16px",
-                    fontWeight: "500",
-                  }}
-                >
-                  {data.productKey[0].name}
+              <div id="cartProductsBoxResponsive">
+                <p className="productName" title="Product Name">
+                  {data.productId.name.slice(0, 80) + "..."}
                 </p>
-                <p
+                {/* <p
                   style={{
                     color: "#878787",
                     fontSize: "13px",
@@ -332,44 +336,20 @@ const Cart = (props) => {
                   }}
                 >
                   Seller : Name
-                </p>
-                <p className="mt-2">
-                  <del
-                    style={{
-                      color: "#878787",
-                      fontSize: "13px",
-                      fontWeight: "500",
-                      marginTop: "-10px",
-                    }}
-                  >
-                    {data.productKey[0].mrp}
-                  </del>
-                  <span
-                    style={{
-                      color: "#212121",
-                      fontSize: "18px",
-                      fontWeight: "500",
-                      marginLeft: "10px",
-                    }}
-                  >
-                    ₹ {finalAmountAfterDiscount}
-                  </span>
-                  <span
-                    style={{
-                      color: "#388e3c",
-                      fontSize: "13px",
-                      fontWeight: "bold",
-                      marginLeft: "10px",
-                    }}
-                  >
-                    {data.productKey[0].discountPercent} % Off
+                </p> */}
+                <p className="mt-2 pricingRow ">
+                  <del>{data.productId.mrp}</del>
+                  <span className="price">₹ {finalAmountAfterDiscount}</span>
+                  <span className="percent">
+                    {data.productId.discountPercent} % Off
                   </span>
                 </p>
 
                 <p
+                  className="pricePerProduct"
                   style={{
                     color: "#212121",
-                    fontSize: "16px",
+                    fontSize: "10px",
                     fontWeight: "400",
                     marginTop: "-10px",
                   }}
@@ -390,16 +370,15 @@ const Cart = (props) => {
                 <p
                   style={{
                     color: "#212121",
-                    fontSize: "18px",
+                    fontSize: "12px",
                     fontWeight: "500",
                     marginTop: "-10px",
                   }}
                 >
                   Total Amount - ₹{" "}
-                  {(data.productKey[0].mrp -
+                  {(data.productId.mrp -
                     parseInt(
-                      (data.productKey[0].mrp *
-                        data.productKey[0].discountPercent) /
+                      (data.productId.mrp * data.productId.discountPercent) /
                         100
                     )) *
                     data.qty}
@@ -408,7 +387,7 @@ const Cart = (props) => {
                 <p
                   style={{
                     color: "#212121",
-                    fontSize: "18px",
+                    fontSize: "10px",
                     fontWeight: "500",
                     marginTop: "-10px",
                   }}
@@ -419,43 +398,18 @@ const Cart = (props) => {
 
                 <a
                   href="#"
+                  title="Remove Product"
                   style={{
                     color: "#212121",
-                    fontSize: "16px",
+                    fontSize: "13px",
                     fontWeight: "500",
                     fontSize: "18px",
                     textDecoration: "none",
                   }}
-                  onClick={(e) =>
-                    deleteCartItem(e, data.userKey[0].id, data.id)
-                  }
+                  onClick={(e) => deleteCartItem(e, data.userId.id, data.id)}
                 >
                   Remove
                 </a>
-              </div>
-
-              <div style={{ margin: "0 0 0 150px" }}>
-                <p
-                  style={{
-                    color: "#212121",
-                    fontSize: "16px",
-                    fontWeight: "400",
-                  }}
-                >
-                  Delivery by Tue Jul 11
-                  <span>
-                    {" | "}
-                    <b
-                      style={{
-                        color: "green",
-                        fontSize: "16px",
-                        fontWeight: "400",
-                      }}
-                    >
-                      Free
-                    </b>
-                  </span>
-                </p>
               </div>
             </div>
           </div>
@@ -498,11 +452,11 @@ const Cart = (props) => {
               <p className="down ">
                 <b>User Details -</b>
 
-                {data.userKey[0].u_fname + data.userKey[0].u_lname}
+                {data.userId.u_fname + data.userId.u_lname}
 
                 <span style={{ marginLeft: "40px" }}>
                   {" "}
-                  {data.userKey[0].u_email}{" "}
+                  {data.userId.u_email}{" "}
                 </span>
               </p>
 
@@ -581,7 +535,7 @@ const Cart = (props) => {
       <br />
 
       <div className="checkout">
-        <section style={{ padding: "30px 30px" }}>
+        <section style={{ padding: "20px 10px" }}>
           <div className=" leftSide">
             {/* second box */}
 
@@ -591,8 +545,20 @@ const Cart = (props) => {
                   className=" d-flex bg-primary"
                   style={{ padding: "10px 0 0 20px" }}
                 >
-                  <p className="count">2</p>
+                  <p className="count">1</p>
                   <p className="upper text-light"> Deliver To </p>
+                  <div data-cy="isLoading" className="">
+                    {isLoading ? (
+                      <ReactLoading
+                        type="spinningBubbles"
+                        color="#fff"
+                        height={50}
+                        width={50}
+                      />
+                    ) : (
+                      ""
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -623,22 +589,22 @@ const Cart = (props) => {
 
               <div className="d-flex justify-content-between">
                 <p>Price ( {fetchCart.length} ) Items </p>
-                <p>₹ {totalCartValue} </p>
+                <p id="dynamicOutput">₹ {totalCartValue} </p>
               </div>
 
               <div className="d-flex justify-content-between">
                 <p>Total Discount </p>
-                <p>₹ {totalCartSavings} </p>
+                <p id="dynamicOutput">₹ {totalCartSavings} </p>
               </div>
 
               <div className="d-flex justify-content-between">
                 <p>Total Tax </p>
-                <p>₹ {totalCartTax} </p>
+                <p id="dynamicOutput">₹ {totalCartTax} </p>
               </div>
 
               <div className="d-flex justify-content-between">
                 <p>Delivery Charges </p>
-                <p style={{ color: "green" }}>
+                <p id="dynamicOutput" style={{ color: "green" }}>
                   {" "}
                   {deliveryCharges <= 0 ? "Free" : "₹ " + deliveryCharges}{" "}
                 </p>
@@ -650,7 +616,7 @@ const Cart = (props) => {
                 <p>
                   <b> Amount Payable </b>
                 </p>
-                <p>
+                <p id="dynamicOutput">
                   <b> ₹ {totalPayableAmount} </b>
                 </p>
               </div>
@@ -682,56 +648,3 @@ const Cart = (props) => {
 };
 
 export default Cart;
-
-{
-  /* <input
-type="button"
-className="mr-3"
-style={{
-borderRadius: "50%",
-width: "25px",
-height: "25px",
-border: "1px solid #ddd",
-fontSize: "15px",
-marginRight: "10px",
-
-}}
-value="-"
-onClick={minusBtnOnClick}
-/> */
-}
-
-{
-  /* <input
-type="number"
-style={{
-width: "50px",
-border: "1px solid #ddd",
-fontSize: "15px",
-padding: "3px",
-textAlign: "center",
-}}
-
-min={1}
-value={productQtyInput}
-name="productQtyInput"
-onChange={ inputOnChange }
-/> */
-}
-
-{
-  /* <input
-type="button"
-className="ml-3"
-style={{
-borderRadius: "50%",
-width: "25px",
-height: "25px",
-border: "1px solid #ddd",
-fontSize: "15px",
-marginLeft: "10px",
-}}
-value="+"
-onClick={plusBtnOnClick}
-/> */
-}

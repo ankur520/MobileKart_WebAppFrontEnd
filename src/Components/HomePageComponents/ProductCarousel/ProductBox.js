@@ -1,5 +1,5 @@
-import React from "react";
-import {Link , useNavigate  }    from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { BrowserRouter } from "react-router-dom";
 
 import Carousel from "./Carousel";
@@ -10,17 +10,19 @@ const ProductBox = (props) => {
 
   return (
     <>
-      <div className="sectionFour " id="productCarouselBox" >
+      <div className="sectionFour " id="productCarouselBox">
         <div className="row">
-          <div className="col-2 leftSide">
+          <div
+            id="homeProductCarouselHideOnMobile"
+            className="col-xl-2 col-lg-2 col-md-2   leftSide"
+          >
             <h4 className="fs-2">
               Top Deals on <br />{" "}
               <span data-cy="subCategory">{props.subCategory}</span>
             </h4>
             <button className="btn btn-primary btn-md py-2 px-5 mt-4 ">
-            
               {/* <BrowserRouter > */}
-            
+
               <Link
                 to={`/productall/Mobiles/${props.subCategory}/`}
                 style={{ textDecoration: "none", color: "#fff" }}
@@ -30,14 +32,14 @@ const ProductBox = (props) => {
               </Link>
 
               {/* </BrowserRouter> */}
-
             </button>
           </div>
 
-          <div className="col-10 rightSide">
+          <div className="col-xl-10 col-lg-10 col-md-10  col-sm-12 col-xs-12  rightSide">
             <Carousel
               productsArray={props.productsArray}
               subCategory={props.subCategory}
+              isLoading={props.isLoading}
             />
           </div>
         </div>

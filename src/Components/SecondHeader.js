@@ -47,18 +47,17 @@ const SecondHeader = () => {
         />
 
         <div className="categoryBox">
-          <a href="#">
+          <Link to="http://localhost:3000/productall/Mobiles/">
             <div className="categoryImage">
               <img
                 src="https://rukminim1.flixcart.com/fk-p-flap/128/128/image/50379f65f7b59622.png?q=100"
                 alt="react logo"
               />
             </div>
-
-            <Link to="http://localhost:3000/productall/Mobiles/">
-              <p className="shopCategory">All Brands</p>
-            </Link>
-          </a>
+          </Link>
+          <Link to="http://localhost:3000/productall/Mobiles/">
+            <p className="shopCategory">All Brands</p>
+          </Link>
         </div>
       </section>
     </>

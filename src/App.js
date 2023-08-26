@@ -27,74 +27,57 @@ function App() {
       // console.log("toeken is " , decoded )
 
       setloggedUserInfo(decoded);
-    } else {
-      // console.log(" token NOT available App.js   ")
     }
   };
-
-  // console.log("APP.JS - " , loggedUserInfo )
-
-  // console.log("App- userLoggedData - ",  userLoggedData)
 
   useEffect(() => {
     // console.log("use Effect from APP.js ")
 
     fetchTokenFromLocal();
   }, []);
+  // console.log(loggedUserInfo);
 
   return (
     <>
+      {/* <BrowserRouter > */}
 
-    {/* <BrowserRouter > */}
-    
-        <Routes>
-          {/* USER ROUTES  */}
-          <Route path="/" element={<Home />}>
-            {" "}
-          </Route>
+      <Routes>
+        {/* USER ROUTES  */}
+        <Route path="/" element={<Home />}></Route>
 
-          {/* element= { localStorage.getItem("userLoginToken")  ?   <ViewCart   loggedUserInfo={loggedUserInfo} />   : < Home  />   }  */}
-          <Route
-            path="/viewcart"
-            element={<ViewCart loggedUserInfo={loggedUserInfo} />}
-          >
-            {" "}
-          </Route>
-          <Route
-            path="/checkout"
-            element={<Checkout loggedUserInfo={loggedUserInfo} />}
-          ></Route>
+        {/* element= { localStorage.getItem("userLoginToken")  ?   <ViewCart   loggedUserInfo={loggedUserInfo} />   : < Home  />   }  */}
+        <Route
+          path="/viewcart"
+          element={<ViewCart loggedUserInfo={loggedUserInfo} />}
+        ></Route>
+        <Route
+          path="/checkout"
+          element={<Checkout loggedUserInfo={loggedUserInfo} />}
+        ></Route>
 
-          <Route path="/contactus" element={<Contactus />}></Route>
-          <Route
-            path="/productdetail/*"
-            element={<Productdetail loggedUserInfo={loggedUserInfo} />}
-          ></Route>
-          {/*PRODUCT FILTER PAGE   */}
-          <Route path="/productall/*" element={<ProductAll />}></Route>
-          <Route path="/signup" element={<UserSignup />}></Route>
+        <Route path="/contactus" element={<Contactus />}></Route>
+        <Route
+          path="/productdetail/*"
+          element={<Productdetail loggedUserInfo={loggedUserInfo} />}
+        ></Route>
+        {/*PRODUCT FILTER PAGE   */}
+        <Route path="/productall/*" element={<ProductAll />}></Route>
+        <Route path="/signup" element={<UserSignup />}></Route>
 
-          {/* if user not logged in redirect to User SIgn IN Page  localStorage.getItem("userLoginToken") ? <UserDashboard loggedUserInfo={loggedUserInfo} /> :  */}
-          <Route path="/user/*" element={<UserDashboard />}></Route>
+        {/* if user not logged in redirect to User SIgn IN Page  localStorage.getItem("userLoginToken") ? <UserDashboard loggedUserInfo={loggedUserInfo} /> :  */}
+        <Route path="/user/*" element={<UserDashboard />}></Route>
 
-          {/* VENDOR ROUTES  */}
+        {/* VENDOR ROUTES  */}
 
-          {/* if Vendor  not logged in redirect to Vendor SIgn IN Page */}
-          <Route path="/vendor/*" element={<VendorDashboard />}>
-            {" "}
-          </Route>
+        {/* if Vendor  not logged in redirect to Vendor SIgn IN Page */}
+        <Route path="/vendor/*" element={<VendorDashboard />}></Route>
 
-          <Route path="/vendorsignup" element={<VendorSignup />}></Route>
-        </Routes>
+        <Route path="/vendorsignup" element={<VendorSignup />}></Route>
+      </Routes>
 
-        {/* </BrowserRouter> */}
-  
+      {/* </BrowserRouter> */}
     </>
   );
 }
 
 export default App;
-
-// {
-//   localStorage.getItem("userLoginToken") ?
-// }

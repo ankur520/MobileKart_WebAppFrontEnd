@@ -4,6 +4,8 @@ import { AiOutlineLink } from "react-icons/ai";
 import { FaRupeeSign, FaPercentage } from "react-icons/fa";
 import { BiLinkAlt } from "react-icons/bi";
 import axios from "axios";
+import { backendApis } from "../../Utils/APIS";
+import ReactLoading from "react-loading";
 
 // productDiscount
 const AddProduct = (props) => {
@@ -12,6 +14,7 @@ const AddProduct = (props) => {
   const [productSubCategory, setproductSubCategory] = useState([]);
   const [productFareDisable, setproductFareDisable] = useState(true);
   const [getCategory, setgetCategory] = useState([]);
+  const [isLoading, setisLoading] = useState(false);
 
   // for all inputs
   const [productName, setproductName] = useState("");
@@ -113,23 +116,22 @@ const AddProduct = (props) => {
   };
 
   // GET CATEGORY FROM DATABASE
-  const getCategoryFromDjango = () => {
-    axios
-      .get(props.APIS.addCategory)
+  const getCategoryFromDjango = async () => {
+    setisLoading(true);
+    await axios
+      .get(backendApis.vendorApi.addcategory)
 
-      .then(function (response) {
-        // console.log(response.data)
+      .then(
+        await function (response) {
+          // console.log(response.data)
 
-        if (response.data.msg === "CategoryGETREQUEST") {
-          // console.log("GET Request WORKING")
-          setgetCategory(response.data.fetchCategory);
+          if (response.data.msg === "CategoryGETREQUEST") {
+            // console.log("GET Request WORKING")
+            setgetCategory(response.data.fetchCategory);
+            setisLoading(false);
+          }
         }
-      })
-
-      .catch(function (error) {
-        console.log("ERROR IS- ", error);
-        alert("ERROR");
-      });
+      );
   };
 
   useEffect(() => {
@@ -137,16 +139,16 @@ const AddProduct = (props) => {
   }, []);
 
   // click on category to get sub category
-  const selectProductCategory = (e) => {
+  const selectProductCategory = async (e) => {
+    setisLoading(true);
     // console.log("--" , e.target.value  )
     let catId = e.target.value;
 
     // Now find sub cat name with cat id
-    let url = props.APIS.getSubCatByCat + catId + "/";
-
+    let url = backendApis.vendorApi.get_subcat_bycategory + catId + "/";
     // console.log("URL" , url )
 
-    axios
+    await axios
       .get(url)
 
       .then(function (response) {
@@ -155,22 +157,19 @@ const AddProduct = (props) => {
         if (response.data.msg === "SubCategoryGETREQUEST") {
           // console.log("GET Request WORKING")
           setproductSubCategory(response.data.fetchSubCategory);
+          setisLoading(false);
         }
-      })
-
-      .catch(function (error) {
-        console.log("ERROR IS- ", error);
-        alert("ERROR");
       });
   };
 
   // click on tax select to get all tax classes   taxable
-  const TaxableOnClick = (e) => {
+  const TaxableOnClick = async (e) => {
+    setisLoading(true);
     if (e.target.value === "taxable") {
       // console.log("URL" , url )
 
-      axios
-        .get(props.APIS.addTaxes)
+      await axios
+        .get(backendApis.vendorApi.add_tax)
 
         .then(function (response) {
           // console.log(response.data)
@@ -179,12 +178,8 @@ const AddProduct = (props) => {
             // console.log("GET Request WORKING")
             // console.log(response.data.TaxClass)
             setproductTaxClass(response.data.TaxClass);
+            setisLoading(false);
           }
-        })
-
-        .catch(function (error) {
-          console.log("ERROR IS- ", error);
-          alert("ERROR");
         });
     } else {
       // console.log("NON Taxable")
@@ -213,27 +208,10 @@ const AddProduct = (props) => {
     }
   };
 
-  const AddProductOnSubmit = (e) => {
+  const AddProductOnSubmit = async (e) => {
+    setisLoading(true);
     e.preventDefault();
-    console.log("-------------- ADD btn clicked --------");
-    // console.log( "productName- " , productName  )
-    // console.log( "productMrp- " , productMrp  )
-    // console.log( "productDiscount- " , productDiscount  )
-    // console.log( "productType- " , productType  )
-    // console.log( "productCategory- " , productCategory  )
-    // console.log( "productSubCategoryData- " , productSubCategoryData  )
-    // console.log( "productTaxType- " , productTaxType  )
-    // console.log( "productTaxClassData- " , productTaxClassData  )
-    // console.log( "productShippingStatus- " , productShippingStatus  )
-    // console.log( "productFare- " , productFare  )
-    // console.log( "productUnits- " , productUnits  )
-    // console.log( "productStockStatus- " , productStockStatus  )
-    // console.log( "productTrackQty- " , productTrackQty  )
-    // console.log( "productImageLink1- " , productImageLink1  )
-    // console.log( "productImageLink2- " , productImageLink2  )
-    // console.log( "productImageLink3- " , productImageLink3  )
-    // console.log( "productImageLink4- " , productImageLink4  )
-    // console.log( "productImageLink5- " , productImageLink5  )
+    // console.log("-------------- ADD btn clicked --------")
 
     let vendorId = props.vendorId;
     let productNamee = productName;
@@ -255,11 +233,33 @@ const AddProduct = (props) => {
     let productImageLink44 = productImageLink4;
     let productImageLink55 = productImageLink5;
     let productDescriptionn = productDescription;
-    console.log("vendorId- ", vendorId);
+    // console.log("vendorId- ", vendorId);
     // console.log("productFaree- ", productFaree )
 
-    axios
-      .post(props.APIS.addProduct, {
+    // console.log( "vendorId- " , vendorId  )
+    // console.log( "productNamee- " , productNamee  )
+    // console.log( "productMrpp- " , productMrpp  )
+    // console.log( "productDiscountt- " , productDiscountt  )
+    // console.log( "productTypee- " , productTypee  )
+    // console.log( "productCategoryy- " , productCategoryy  )
+    // console.log( "productSubCategoryDataa- " , productSubCategoryDataa  )
+    // console.log( "productTaxTypee- " , productTaxTypee  )
+    // console.log( "productTaxClassDataa- " , productTaxClassDataa  )
+
+    // console.log( "productShippingStatuss- " , productShippingStatuss  )
+    // console.log( "productFaree- " , productFaree  )
+    // console.log( "productUnitss- " , productUnitss  )
+    // console.log( "productStockStatuss- " , productStockStatuss  )
+    // console.log( "productTrackQtyy- " , productTrackQtyy  )
+    // console.log( "productImageLink11- " , productImageLink11  )
+    // console.log( "productImageLink22- " , productImageLink22  )
+    // console.log( "productImageLink33- " , productImageLink33  )
+    // console.log( "productImageLink44- " , productImageLink44  )
+    // console.log( "productImageLink44 " , productImageLink44  )
+    // console.log( "productDescriptionn " , productDescriptionn  )
+
+    await axios
+      .post(backendApis.vendorApi.addproduct, {
         vendorId,
         productNamee,
         productMrpp,
@@ -283,24 +283,47 @@ const AddProduct = (props) => {
       })
 
       .then(function (response) {
-        console.log("Response- ", response);
+        // console.log("Response- ", response.data);
 
-        if (response.data.msg === "ProductAddedSuccessfully") {
-          alert("ProductAddedSuccessfully");
-          window.location.replace("/vendor/allproducts");
+        if (response.data.status === 200) {
+          if (response.data.msg === "ProductAddedSuccessfully") {
+            alert("ProductAddedSuccessfully");
+            // window.location.replace("/vendor/allproducts");
+            setproductName("");
+            setproductMrp("");
+            setproductDiscount("");
+            setproductType("");
+            setproductCategory("");
+            setproductSubCategoryData("");
+            setproductTaxType("");
+            setproductTaxClassData("");
+            setproductShippingStatus("");
+            setproductFare("");
+            setproductUnits("");
+            setproductStockStatus("");
+            setproductTrackQty("");
+            setproductImageLink1("");
+            setproductImageLink2("");
+            setproductImageLink3("");
+            setproductImageLink4("");
+            setproductImageLink5("");
+            setproductDescription("");
+
+            setproductTaxClass([]);
+            setproductSubCategory([]);
+            setgetCategory([]);
+            setisLoading(false);
+          }
         } else {
           alert(response.data.msg);
+          setisLoading(false);
         }
-      })
-
-      .catch(function (error) {
-        console.log("Axios Error ", error);
       });
   };
 
   return (
     <>
-      <div className="tabAddProduct"  >
+      <div className="tabAddProduct">
         <nav>
           <div className="nav nav-tabs" id="nav-tab" role="tablist">
             <button
@@ -340,6 +363,19 @@ const AddProduct = (props) => {
             >
               Images
             </button>
+            <span data-cy="isLoading">
+              {isLoading ? (
+                <ReactLoading
+                  type="spinningBubbles"
+                  color="#2874f0"
+                  height={25}
+                  width={25}
+                />
+              ) : (
+                ""
+              )}
+            </span>
+
             {/* <button className="nav-link" id="nav-disabled-tab" data-bs-toggle="tab" data-bs-target="#nav-disabled" type="button" role="tab" aria-controls="nav-disabled" aria-selected="false" disabled>Disabled</button> */}
           </div>
         </nav>
@@ -358,13 +394,14 @@ const AddProduct = (props) => {
                 <input
                   type="text"
                   className="form-control "
-                  id="floatingInput"
+                  id="floatingInputProductName"
                   placeholder=" "
                   required
+                  value={productName}
                   onChange={inputOnChange}
                   name="productName"
                 />
-                <label htmlFor="floatingInput">Product Name</label>
+                <label htmlFor="floatingInputProductName">Product Name</label>
               </div>
 
               <div className="row  mb-3 ">
@@ -377,13 +414,16 @@ const AddProduct = (props) => {
                       <input
                         type="number"
                         className="form-control  "
-                        id="floatingInputGroup1"
+                        id="floatingInputGroup1MRP"
                         placeholder=" "
                         required
                         onChange={inputOnChange}
                         name="productMrp"
+                        value={productMrp}
                       />
-                      <label htmlFor="floatingInputGroup1">Product MRP</label>
+                      <label htmlFor="floatingInputGroup1MRP">
+                        Product MRP
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -396,14 +436,15 @@ const AddProduct = (props) => {
                     <div className="form-floating">
                       <input
                         type="text"
+                        value={productDiscount}
                         className="form-control"
-                        id="floatingInputGroup1"
+                        id="floatingInputGroup1Discount"
                         placeholder=" "
                         required
                         onChange={inputOnChange}
                         name="productDiscount"
                       />
-                      <label htmlFor="floatingInputGroup1">
+                      <label htmlFor="floatingInputGroup1Discount">
                         Product Discount{" "}
                       </label>
                     </div>
@@ -416,18 +457,19 @@ const AddProduct = (props) => {
                   <div className="form-floating">
                     <select
                       className="form-select"
-                      id="floatingSelect selectProductType"
+                      id="floatingSelecttype selectProductType"
                       aria-label="Floating label select example"
                       required
                       onChange={inputOnChange}
                       name="productType"
                     >
-                      <option>Select</option>
                       <option value="simpleProduct">Simple Product</option>
                       <option value="variableProduct">Variable Product</option>
                     </select>
 
-                    <label htmlFor="floatingSelect">Select Product Type</label>
+                    <label htmlFor="floatingSelecttype">
+                      Select Product Type
+                    </label>
                   </div>
                 </div>
 
@@ -435,24 +477,23 @@ const AddProduct = (props) => {
                   <div className="form-floating">
                     <select
                       className="form-select"
-                      id="floatingSelect"
+                      id="floatingSelectCategory"
                       aria-label="Floating label select example"
                       required
                       onChange={inputOnChange}
                       onClick={selectProductCategory}
                       name="productCategory"
                     >
-                      <option>Select</option>
-                      {getCategory.map((cat) => {
+                      {getCategory.map((data, index) => {
                         return (
-                          <option key={cat.id} value={cat.cat_name}>
-                            {cat.cat_name}
+                          <option key={index} value={data.id}>
+                            {data.cat_name}
                           </option>
                         );
                       })}
                     </select>
 
-                    <label htmlFor="floatingSelect">
+                    <label htmlFor="floatingSelectCategory">
                       Select Product Category
                     </label>
                   </div>
@@ -462,23 +503,22 @@ const AddProduct = (props) => {
                   <div className="form-floating ">
                     <select
                       className="form-select"
-                      id="floatingSelect"
+                      id="floatingSelectSubCategory"
                       aria-label="Floating label select example"
                       required
                       onChange={inputOnChange}
                       name="productSubCategory"
                     >
-                      <option>Select</option>
-                      {productSubCategory.map((cat) => {
+                      {productSubCategory.map((data, index) => {
                         return (
-                          <option key={cat.id} value={cat.sub_cat_name}>
-                            {cat.sub_cat_name}
+                          <option key={index} value={data.id}>
+                            {data.sub_cat_name}
                           </option>
                         );
                       })}
                     </select>
 
-                    <label htmlFor="floatingSelect">
+                    <label htmlFor="floatingSelectSubCategory">
                       Select Product SubCategory
                     </label>
                   </div>
@@ -489,13 +529,17 @@ const AddProduct = (props) => {
                 <textarea
                   className="form-control"
                   placeholder=" "
-                  id="floatingTextarea2"
+                  id="floatingTextareaProductDesc"
                   style={{ height: "100px" }}
                   required
                   onChange={inputOnChange}
+                  value={productDescription}
                   name="productDescription"
                 ></textarea>
-                <label htmlFor="floatingTextarea2"> Product Description </label>
+                <label htmlFor="floatingTextareaProductDesc">
+                  {" "}
+                  Product Description{" "}
+                </label>
               </div>
             </div>
 
@@ -516,19 +560,20 @@ const AddProduct = (props) => {
                   <div className="form-floating">
                     <select
                       className="form-select"
-                      id="floatingSelect"
+                      id="floatingSelectTaxStatus"
                       aria-label="Floating label select example"
                       required
                       onChange={inputOnChange}
                       name="productTaxType"
                       onClick={TaxableOnClick}
                     >
-                      <option>Select</option>
                       <option value="taxable">Taxable</option>
                       <option value="non_taxable">Non Taxable</option>
                     </select>
 
-                    <label htmlFor="floatingSelect">Select Tax Status</label>
+                    <label htmlFor="floatingSelectTaxStatus">
+                      Select Tax Status
+                    </label>
                   </div>
                 </div>
 
@@ -536,20 +581,20 @@ const AddProduct = (props) => {
                   <div className="form-floating">
                     <select
                       className="form-select"
-                      id="floatingSelect"
+                      id="floatingSelectTaxClass"
                       aria-label="Floating label select example"
                       required
                       onChange={inputOnChange}
                       name="productTaxClass"
                     >
-                      <option>Select</option>
-
                       {productTaxClass.map((data) => {
                         return <option key={data.id}> {data.tax_name} </option>;
                       })}
                     </select>
 
-                    <label htmlFor="floatingSelect">Select Tax Class</label>
+                    <label htmlFor="floatingSelectTaxClass">
+                      Select Tax Class
+                    </label>
                   </div>
                 </div>
               </div>
@@ -562,14 +607,13 @@ const AddProduct = (props) => {
                   <div className="form-floating">
                     <select
                       className="form-select"
-                      id="floatingSelect"
+                      id="floatingSelectShipping"
                       aria-label="Floating label select example"
                       required
                       onChange={inputOnChange}
                       name="productShippingStatus"
                       onClick={shippingOnClick}
                     >
-                      <option>Select</option>
                       <option value="locationWise">
                         Location Wise Shipping{" "}
                       </option>
@@ -577,7 +621,7 @@ const AddProduct = (props) => {
                       <option value="FreeShipping">Free Shipping</option>
                     </select>
 
-                    <label htmlFor="floatingSelect">
+                    <label htmlFor="floatingSelectShipping">
                       Select Shipping Status
                     </label>
                   </div>
@@ -600,7 +644,7 @@ const AddProduct = (props) => {
                         name="productFare"
                         min={0}
                       />
-                      <label htmlFor="floatingInputGroup1">Fare</label>
+                      <label htmlFor="floatingInputGroupFare">Fare</label>
                     </div>
                   </div>
                 </div>
@@ -619,14 +663,17 @@ const AddProduct = (props) => {
                       <input
                         type="text"
                         className="form-control"
-                        id="floatingInputGroup1"
+                        id="floatingInputTotalUnits"
                         placeholder=" "
                         required
+                        value={productUnits}
                         onChange={inputOnChange}
                         name="productUnits"
                         min={1}
                       />
-                      <label htmlFor="floatingInputGroup1">Total Units</label>
+                      <label htmlFor="floatingInputTotalUnits">
+                        Total Units
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -635,7 +682,7 @@ const AddProduct = (props) => {
                   <div className="form-floating ">
                     <select
                       className="form-select"
-                      id="floatingSelect"
+                      id="floatingSelectStockStatus"
                       aria-label="Floating label select example"
                       required
                       onChange={inputOnChange}
@@ -646,7 +693,9 @@ const AddProduct = (props) => {
                       <option value="Out-Of-Stock">Out Of Stock</option>
                     </select>
 
-                    <label htmlFor="floatingSelect">Select Stock Status</label>
+                    <label htmlFor="floatingSelectStockStatus">
+                      Select Stock Status
+                    </label>
                   </div>
                 </div>
 
@@ -654,18 +703,17 @@ const AddProduct = (props) => {
                   <div className="form-floating ">
                     <select
                       className="form-select"
-                      id="floatingSelect"
+                      id="floatingSelectTrackQty"
                       aria-label="Floating label select example"
                       required
                       onChange={inputOnChange}
                       name="productTrackQty"
                     >
-                      <option> Select </option>
                       <option value="Yes-Track-it">Yes Track it</option>
                       <option value="Dont-Track-it">Dont Track it</option>
                     </select>
 
-                    <label htmlFor="floatingSelect">
+                    <label htmlFor="floatingSelectTrackQty">
                       Track Stock Qty For This Product
                     </label>
                   </div>
@@ -705,14 +753,14 @@ const AddProduct = (props) => {
                     <input
                       type="text"
                       className="form-control"
-                      id="floatingInputGroup1"
+                      id="floatingImageLink1"
                       placeholder=" "
                       required
                       onChange={inputOnChange}
                       name="productImageLink1"
                       value={productImageLink1}
                     />
-                    <label htmlFor="floatingInputGroup1">Image Link 1</label>
+                    <label htmlFor="floatingImageLink1">Image Link 1</label>
                   </div>
                 </div>
               </div>
@@ -732,14 +780,14 @@ const AddProduct = (props) => {
                     <input
                       type="text"
                       className="form-control"
-                      id="floatingInputGroup1"
+                      id="floatingImageLink2"
                       placeholder=" "
                       required
                       onChange={inputOnChange}
                       name="productImageLink2"
                       value={productImageLink2}
                     />
-                    <label htmlFor="floatingInputGroup1">Image Link 2</label>
+                    <label htmlFor="floatingImageLink2">Image Link 2</label>
                   </div>
                 </div>
               </div>
@@ -759,14 +807,14 @@ const AddProduct = (props) => {
                     <input
                       type="text"
                       className="form-control"
-                      id="floatingInputGroup1"
+                      id="floatingImageLink3"
                       placeholder=" "
                       required
                       onChange={inputOnChange}
                       name="productImageLink3"
                       value={productImageLink3}
                     />
-                    <label htmlFor="floatingInputGroup1">Image Link 3</label>
+                    <label htmlFor="floatingImageLink3">Image Link 3</label>
                   </div>
                 </div>
               </div>
@@ -786,14 +834,14 @@ const AddProduct = (props) => {
                     <input
                       type="text"
                       className="form-control"
-                      id="floatingInputGroup1"
+                      id="floatingImageLink4"
                       placeholder=" "
                       required
                       onChange={inputOnChange}
                       name="productImageLink4"
                       value={productImageLink4}
                     />
-                    <label htmlFor="floatingInputGroup1">Image Link 4</label>
+                    <label htmlFor="floatingImageLink4">Image Link 4</label>
                   </div>
                 </div>
               </div>
@@ -813,14 +861,14 @@ const AddProduct = (props) => {
                     <input
                       type="text"
                       className="form-control"
-                      id="floatingInputGroup1"
+                      id="floatingImageLink5"
                       placeholder=" "
                       required
                       onChange={inputOnChange}
                       name="productImageLink5"
                       value={productImageLink5}
                     />
-                    <label htmlFor="floatingInputGroup1">Image Link 5</label>
+                    <label htmlFor="floatingImageLink5">Image Link 5</label>
                   </div>
                 </div>
               </div>

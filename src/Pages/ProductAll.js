@@ -1,29 +1,37 @@
 import Header from "../Components/Header";
-import { AiFillCaretDown, AiFillCaretUp, AiFillHeart } from "react-icons/ai";
+import {
+  AiFillCaretDown,
+  AiFillCaretUp,
+  AiFillHeart,
+  AiOutlineHeart,
+} from "react-icons/ai";
 // import $ from 'jquery';
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, redirect } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import SecondHeader from "../Components/SecondHeader";
+import ReactLoading from "react-loading";
+import jwtDecode from "jwt-decode";
+
+import { backendApis } from "../Utils/APIS";
 
 export const ProductAll = () => {
   const navigation = useNavigate();
 
+  const [userWishList, setuserWishList] = useState([]);
   const [allProducts, setallProducts] = useState([]);
   const [getCategory, setgetCategory] = useState([]);
   const [getSubCategory, setgetSubCategory] = useState([]);
   const [ApiElseMessage, setApiElseMessage] = useState("");
 
+  const [loggedUserId, setloggedUserId] = useState();
 
-  const fetchFromDb = () => {
-    // console.log("----productall--fetchFromDb------")
+  const [isLoading, setisLoading] = useState(false);
 
+  const fetchFromDb = async () => {
+    setisLoading(true);
     let fetchUrlLength = document.location.href.split("/").length;
-
-    // console.log("fetchUrlLength- " , fetchUrlLength )
-
-    // console.log(document.location.href.split("/"))
 
     if (fetchUrlLength === 6) {
       // console.log("---4---")
@@ -40,11 +48,11 @@ export const ProductAll = () => {
       // console.log("postData- ", postData )
 
       let sessionUrl =
-        "http://localhost:8000/vendorApi/filter-productdetail-bySlug/" +
+        backendApis.vendorApi.filter_productdetail_bySlugByFilterSlug +
         postData +
         "/";
 
-      axios
+      await axios
         .get(sessionUrl)
 
         .then(function (response) {
@@ -52,17 +60,19 @@ export const ProductAll = () => {
             // console.log("FilterProductGETREQUEST")
             // console.log(response.data.fetchProduct);
             setallProducts(response.data.fetchProduct);
-            setApiElseMessage("")
+            setApiElseMessage("");
+            setisLoading(false);
           } else {
             // alert(response.data.msg);
-            setApiElseMessage(response.data.msg)
+            setApiElseMessage("Sorry " + categoryFromUrl + " Does Not Exist");
             setallProducts([]);
+            setisLoading(false);
           }
-        })
+        });
 
-        // .catch(function (error) {
-        //   console.log("Error", error);
-        // });
+      // .catch(function (error) {
+      //   console.log("Error", error);
+      // });
     }
 
     if (fetchUrlLength === 7) {
@@ -78,14 +88,12 @@ export const ProductAll = () => {
 
       let postData = `${categoryFromUrl}-${subCategoryFromUrl}`;
 
-      // console.log("postData- ", postData )
-
       let sessionUrl =
-        "http://localhost:8000/vendorApi/filter-productdetail-bySlug/" +
+        backendApis.vendorApi.filter_productdetail_bySlugByFilterSlug +
         postData +
         "/";
 
-      axios
+      await axios
         .get(sessionUrl)
 
         .then(function (response) {
@@ -93,76 +101,144 @@ export const ProductAll = () => {
             // console.log("FilterProductGETREQUEST")
             // console.log(response.data.fetchProduct);
             setallProducts(response.data.fetchProduct);
-            setApiElseMessage("")
+            setApiElseMessage("");
+            setisLoading(false);
           } else {
             // alert(response.data.msg);
-            setApiElseMessage(response.data.msg)
+            setApiElseMessage(
+              "Sorry " + subCategoryFromUrl + " Does Not Exist"
+            );
             setallProducts([]);
+            setisLoading(false);
           }
-        })
-
-        // .catch(function (error) {
-        //   console.log("Error", error);
-        // });
+        });
     }
 
     if (fetchUrlLength === 5) {
       // http://localhost:3000/productall/
 
-      let sessionUrl = "http://localhost:8000/vendorApi/addproduct";
+      // let sessionUrl = "http://localhost:8000/vendorApi/addproduct";
 
-      axios
-        .get(sessionUrl)
+      await axios
+        .get(backendApis.vendorApi.addproduct)
 
         .then(function (response) {
           if (response.data.msg === "addProductGETRequest") {
             // console.log("FilterProductGETREQUEST")
             // console.log(response.data.fetchProduct);
             setallProducts(response.data.getAllProducts);
-            setApiElseMessage("")
+            setApiElseMessage("");
+            setisLoading(false);
           } else {
             // alert(response.data.msg);
-            setApiElseMessage(response.data.msg)
+            setApiElseMessage(response.data.msg);
             setallProducts([]);
+            setisLoading(false);
           }
-        })
+        });
 
-        // .catch(function (error) {
-        //   // console.log("Error", error);
-        // });
+      // .catch(function (error) {
+      //   // console.log("Error", error);
+      // });
     }
   };
 
-  const fetchCategoryFromDb = () => {
-    let sessionUrl = "http://localhost:8000/vendorApi/addcategory";
+  const fetchCategoryFromDb = async () => {
+    setisLoading(true);
 
-    axios
-      .get(sessionUrl)
+    await axios
+      .get(backendApis.vendorApi.addcategory)
 
       .then(function (response) {
         // console.log(response.data.fetchCategory);
         setgetCategory(response.data.fetchCategory);
-      })
-
-      .catch(function (error) {
-        // console.log("Error", error);
+        setisLoading(false);
       });
   };
 
-  const fetchSubCategoryFromDb = () => {
-    let sessionUrl = "http://localhost:8000/vendorApi/add-sub-category";
+  const fetchSubCategoryFromDb = async () => {
+    setisLoading(true);
 
-    axios
-      .get(sessionUrl)
+    await axios
+      .get(backendApis.vendorApi.add_sub_category)
 
       .then(function (response) {
         // console.log(response.data.fetchCategory);
         setgetSubCategory(response.data.fetchSubCategory);
-      })
-
-      .catch(function (error) {
-        // console.log("Error", error);
+        setisLoading(false);
       });
+  };
+
+  const fetchWishlistForLoggedInUser = async () => {
+    // setisLoading(true);
+
+    if (localStorage.getItem("userLoginToken")) {
+      let decoded = jwtDecode(localStorage.getItem("userLoginToken"));
+
+      setloggedUserId(decoded["fetchedId"]);
+
+      let sessionUrl =
+        backendApis.userApi.wishlist + `${decoded["fetchedId"]}/Null/`;
+      // console.log( sessionUrl )
+      await axios
+        .get(sessionUrl)
+
+        .then(
+          await function (response) {
+            if (response.data.msg === "wishlistGET") {
+              if (response.data.wishlistData.length > 0) {
+                setuserWishList(response.data.wishlistData);
+              }
+            }
+          }
+        );
+    }
+  };
+
+  const removeFromWishList = async (e, userId, productId) => {
+    // console.log(userId, " " + productId);
+
+    let sessionUrl = backendApis.userApi.wishlist + `${userId}/${productId}/`;
+
+    await axios
+      .delete(sessionUrl)
+
+      .then(
+        await function (response) {
+          console.log(response.data);
+          if (response.data.status === 200) {
+            if (response.data.msg === "ItemDeleted") {
+              // console.log("ItemDeleted");
+              fetchFromDb();
+              fetchWishlistForLoggedInUser();
+              // navigation("/productall/" , {redirect: true} )
+            }
+          }
+        }
+      );
+  };
+
+  const addToWishList = async (e, userId, productId) => {
+    // console.log(userId, " " + productId);
+
+    let sessionUrl = backendApis.userApi.wishlist + `${userId}/${productId}/`;
+
+    await axios
+      .post(sessionUrl)
+
+      .then(
+        await function (response) {
+          // console.log(response.data)
+          if (response.data.status === 200) {
+            if (response.data.msg === "addedInWishlist") {
+              // console.log("addedInWishlist");
+              fetchFromDb();
+              fetchWishlistForLoggedInUser();
+              // navigation("/productall/")
+            }
+          }
+        }
+      );
   };
 
   useEffect(() => {
@@ -170,28 +246,31 @@ export const ProductAll = () => {
 
     fetchSubCategoryFromDb();
     fetchCategoryFromDb();
+
     fetchFromDb();
-  }, [navigation]);
+    fetchWishlistForLoggedInUser();
+  }, []);
+
+  // console.log(userWishList);
 
   return (
     <>
       <Header />
 
+      {/* <SecondHeader /> */}
 
-{/* <SecondHeader /> */}
-
-      <div className="productAllSection ">
-        <div className="   left-side">
+      <div className="productAllSection">
+        <div className="left-side ">
           <h2> Filters </h2>
 
           <hr />
 
           <div className="category">
-            <div class="accordion" id="accordionExample">
-              <div class="accordion-item">
-                <h2 class="accordion-header">
+            <div className="accordion" id="accordionExample">
+              <div className="accordion-item">
+                <h2 className="accordion-header">
                   <button
-                    class="accordion-button"
+                    className="accordion-button"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#collapseOne"
@@ -203,11 +282,10 @@ export const ProductAll = () => {
                 </h2>
                 <div
                   id="collapseOne"
-                  class="accordion-collapse collapse show"
+                  className="accordion-collapse collapse show"
                   data-bs-parent="#accordionExample"
                 >
-    
-                  <div class="accordion-body">
+                  <div className="accordion-body">
                     {getCategory.map((data, index) => {
                       return (
                         <p key={index}>
@@ -221,15 +299,13 @@ export const ProductAll = () => {
                       );
                     })}
                   </div>
-
-
                 </div>
               </div>
 
-              <div class="accordion-item">
-                <h2 class="accordion-header">
+              <div className="accordion-item">
+                <h2 className="accordion-header">
                   <button
-                    class="accordion-button collapsed"
+                    className="accordion-button collapsed"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#collapseTwo"
@@ -241,15 +317,15 @@ export const ProductAll = () => {
                 </h2>
                 <div
                   id="collapseTwo"
-                  class="accordion-collapse collapse"
+                  className="accordion-collapse collapse"
                   data-bs-parent="#accordionExample"
                 >
-                  <div class="accordion-body">
+                  <div className="accordion-body">
                     {getSubCategory.map((data, index) => {
                       return (
                         <p key={index}>
                           <Link
-                            to={`/productall/${data.cat_name}/${data.sub_cat_name}/`}
+                            to={`/productall/${data.catId.cat_name}/${data.sub_cat_name}/`}
                           >
                             {" "}
                             {data.sub_cat_name}{" "}
@@ -266,25 +342,42 @@ export const ProductAll = () => {
           </div>
         </div>
 
-        {/* <div className="col-1 right-middle"> ApiElseMessage  </div> */}
+        {/* <div classNameName="col-1 right-middle"> ApiElseMessage  </div> */}
 
         <div className="right-side">
-
-        <div className="d-flex flex-row category">
+          <div className="d-flex flex-row category">
             {/* <h6>Smart Watches</h6> */}
-            <p className="p-1 fs-5 text-danger bold" >
-              {ApiElseMessage}
+            <p className="p-1 fs-5 text-danger bold">
+              {ApiElseMessage.replace("%", " ")}
             </p>
           </div>
+
+          <span data-cy="isLoading">
+            {isLoading ? (
+              <ReactLoading
+                type="spinningBubbles"
+                color="#2874f0"
+                height={50}
+                width={50}
+              />
+            ) : (
+              ""
+            )}
+          </span>
 
           <div className="d-flex flex-row category">
-            <h6>Smart Watches</h6>
-            <p>
-              {"("} Showing 1 {"-"} 40 products of 42,708 products {"}"}
+            <h6>
+              {document.location.href.split("/")[4]} -{" "}
+              {document.location.href.split("/")[5]}{" "}
+            </h6>
+            <p style={{ fontSize: "14px" }}>
+              {"("} Showing {"-"}{" "}
+              {allProducts.length - 1 < 0 ? 0 : allProducts.length - 1} products{" "}
+              {"}"}
             </p>
           </div>
 
-          <div className="d-flex flex-row sortBy mt-2">
+          {/* <div className="d-flex flex-row sortBy mt-2">
             <h6>Sort By</h6>
             <a
               href="/productall"
@@ -304,7 +397,7 @@ export const ProductAll = () => {
             >
               Price -- High to Low
             </a>
-          </div>
+          </div> */}
 
           {/* <hr/> */}
 
@@ -317,31 +410,83 @@ export const ProductAll = () => {
                 return (
                   <div
                     key={data.id}
-                    className=" col-12 col-sm-6 col-md-6 col-lg-3 productBox py-2"
+                    className=" col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3  productBox py-2"
                   >
                     <div className="image">
                       {/* to={'/productdetail/'+`${data.id}`+'/' }  */}
 
                       <Link
                         target="_blank"
-                        to={`/productdetail/${data.Category}/${data.subCategory}/${data.id}/${data.name}/`}
+                        to={`/productdetail/${data.CategoryId.cat_name}/${data.subCategoryId.sub_cat_name}/${data.id}/${data.name}/`}
                       >
                         {" "}
                         <img src={data.image1} alt="" />{" "}
                       </Link>
                     </div>
-                    <p className="wishlistIcon">
-                      <AiFillHeart />
-                    </p>
+
+                    {(() => {
+                      if (!localStorage.getItem("userLoginToken")) {
+                        return (
+                          <p className="wishlistIcon">
+                            <AiFillHeart
+                              title="WishList"
+                              onClick={() => alert("Please Login First")}
+                            />
+                          </p>
+                        );
+                      } else {
+                        // console.log(userWishList[0].id)
+
+                        for (
+                          let index = 0;
+                          index < userWishList.length;
+                          index++
+                        ) {
+                          if (userWishList[index].productId.id === data.id) {
+                            // console.log("matched")
+                            return (
+                              <p
+                                className="wishlistIcon"
+                                style={{ color: "#2874f0" }}
+                              >
+                                <AiFillHeart
+                                  title="Remove From WishList"
+                                  onClick={(e) =>
+                                    removeFromWishList(
+                                      e,
+                                      loggedUserId,
+                                      userWishList[index].productId.id
+                                    )
+                                  }
+                                />
+                              </p>
+                            );
+                          } else {
+                          }
+                        }
+
+                        return (
+                          <p className="wishlistIcon">
+                            <AiFillHeart
+                              title="Add in WishList"
+                              onClick={(e) =>
+                                addToWishList(e, loggedUserId, data.id)
+                              }
+                            />
+                          </p>
+                        );
+                      }
+                    })()}
+
                     <div className="productInfo">
                       <h4 className="name">
                         {" "}
                         <Link
                           style={{ color: "black", textDecoration: "none" }}
-                          to={`/productdetail/${data.Category}/${data.subCategory}/${data.id}/${data.name}/`}
+                          to={`/productdetail/${data.CategoryId.cat_name}/${data.subCategoryId.sub_cat_name}/${data.id}/${data.name}/`}
                         >
                           {" "}
-                          {data.name}{" "}
+                          {data.name.substring(0, 30) + "..."}
                         </Link>{" "}
                       </h4>
                       <p className="subName"> {data.subCategory} </p>

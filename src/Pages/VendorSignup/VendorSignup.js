@@ -6,21 +6,25 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 import jwtDecode from "jwt-decode";
+import ReactLoading from "react-loading";
+import { backendApis } from "../../Utils/APIS";
 
 const sign = require("jwt-encode");
 
 const Signup = () => {
+  const [loginIsLoading, setloginIsLoading] = useState(false);
+  const [signupIsLoading, setsignupIsLoading] = useState(false);
+
   const [termsCondition, settermsCondition] = useState(false);
   const [loginTermsCondition, setloginTermsCondition] = useState(false);
+
+  const [termsConditionCheckBox, settermsConditionCheckBox] = useState(false);
+  const [loginTermsConditionCheckBox, setloginTermsConditionCheckBox] =
+    useState(false);
 
   // const navigate = useNavigate();
 
   useEffect(() => {}, []);
-
-  const djangoUserAPi = {
-    home: "http://localhost:8000/userApi/",
-    signup: "http://localhost:8000/userApi/signup",
-  };
 
   const [fullName, setfullName] = useState("");
   const [email, setemail] = useState("");
@@ -53,81 +57,65 @@ const Signup = () => {
     }
   };
 
-  const handleSignupSubmit = (e) => {
+  const handleSignupSubmit = async (e) => {
     e.preventDefault();
-
+    setsignupIsLoading(true);
     // console.log("handle submit ");
-
-    // console.log(fname ,lname , email , password)
-
-    // console.log( djangoUserAPi.signup  )
-
-    var session_url = "http://localhost:8000/vendorApi/signup";
 
     let fullname = fullName;
     let emailAddress = email;
     let passwords = password;
 
-    axios
-      .post(session_url, { fullname, emailAddress, passwords })
+    await axios
+      .post(backendApis.vendorApi.signup, { fullname, emailAddress, passwords })
 
       .then(function (response) {
-        if (response.data.msg === "VendorSignUpSuccessfull") {
-          alert("VendorSignUpSuccessfull");
-          setfullName("");
-          setemail("");
-          setpassword("");
-
-          // window.location.replace("/vendorsignup")
-          // navigate("/vendorsignup");
-        } else {
-          alert(response.data.msg);
+        if (response.data.status === 200) {
+          if (response.data.msg === "VendorSignUpSuccessfull") {
+            alert("VendorSignUpSuccessfull");
+            setfullName("");
+            setemail("");
+            setpassword("");
+            setsignupIsLoading(false);
+            // window.location.replace("/vendorsignup")
+            // navigate("/vendorsignup");
+          } else {
+            alert(response.data.msg);
+            setsignupIsLoading(false);
+          }
         }
-      })
-
-      .catch(function (error) {
-        // console.log(error , "AXIOS  error");
       });
-
-    // -----------------------
   };
 
-  const handleLoginOnSubmit = (e) => {
+  const handleLoginOnSubmit = async (e) => {
     e.preventDefault();
-
+    setloginIsLoading(true);
     let loginEmailId = loginEmail;
     let loginPasswords = loginPassword;
 
-    var sessionUrl = "http://localhost:8000/vendorApi/vendorLogin";
-
-    axios
-      .post(sessionUrl, {
+    await axios
+      .post(backendApis.vendorApi.vendorLogin, {
         loginEmailId,
         loginPasswords,
       })
 
       .then(function (response) {
-        if (response.data.msg === "VendorLoggedIn") {
-          // console.log("VendorLoggedIn")
+        // console.log(response.data);
 
-          // console.log("toki- " , response.data.token )
+        if (response.data.status === 200) {
+          if (response.data.msg === "VendorLoggedIn") {
+            var decoded = jwtDecode(response.data.token);
+            // console.log("jwtDecode is " , decoded )
 
-          var decoded = jwtDecode(response.data.token);
-          // console.log("jwtDecode is " , decoded )
+            localStorage.setItem("vendorLoginToken", response.data.token);
+            setloginIsLoading(false);
 
-          localStorage.setItem("vendorLoginToken", response.data.token);
-
-          // navigation("/vendor")
-
-          // setloggedInfo(response.data.fetchDetails)
-          window.location.replace("/vendor");
-        } else {
-          alert(response.data.msg);
+            window.location.replace("/vendor");
+          } else {
+            alert(response.data.msg);
+            setloginIsLoading(false);
+          }
         }
-      })
-
-      .then(function (error) {
-        // console.log("Axios Error "  ,  error)
       });
   };
 
@@ -136,18 +124,30 @@ const Signup = () => {
       <Header />
 
       <div style={{ backgroundColor: "#f1f3f6" }} data-cy="vendorSignInSignUp">
-        <h2 className="text-center pt-5 text-bold"> Vendor signup signin </h2>
+        <h2 className="text-center py-2 text-bold"> Vendor signup signin </h2>
 
-        <div className="container row">
-          <div className="col-sm-1"></div>
-
+        <div className="row d-flex flex-row justify-content-center ">
           <div
-            className="col-sm-5 py-5 px-5  "
-            style={{ backgroundColor: "#fff", margin: "0 50px 0 0" }}
+            className="col-12 col-sm-5 col-md-5  py-4 px-4 "
+            style={{ backgroundColor: "#fff", margin: "0 20px 0 0px" }}
           >
-            <h1 className="text-center mt-3">Login </h1>
+            <h1 className="text-center mt-3 d-flex flex-row justify-content-evenly">
+              Login
+              <span>
+                {loginIsLoading ? (
+                  <ReactLoading
+                    type="spinningBubbles"
+                    color="#2874f0"
+                    height={25}
+                    width={25}
+                  />
+                ) : (
+                  ""
+                )}
+              </span>
+            </h1>
 
-            <form method="POST" onSubmit={handleLoginOnSubmit}>
+            <form method="POST" className="px-2" onSubmit={handleLoginOnSubmit}>
               <div className="form-floating mt-5 mb-3">
                 <input
                   type="email"
@@ -157,6 +157,7 @@ const Signup = () => {
                   name="loginEmail"
                   onChange={inputOnChange}
                   placeholder=""
+                  required
                 />
                 <label htmlFor="floatingInput">Email address</label>
               </div>
@@ -170,22 +171,26 @@ const Signup = () => {
                   data-cy="login Password"
                   name="loginPassword"
                   onChange={inputOnChange}
+                  required
                 />
                 <label htmlFor="loginfloatingPassword">Password</label>
               </div>
 
-              <div class="form-group form-check">
+              <div className="form-group form-check">
                 <input
                   type="checkbox"
                   className="form-check-input"
-                  id="signUpTerms"
-                  checked={loginTermsCondition}
+                  id="signUpTermskjadfs"
+                  onChange={() =>
+                    setloginTermsConditionCheckBox(loginTermsConditionCheckBox)
+                  }
+                  // checked={loginTermsCondition}
                   data-cy="signup termsCondition"
                 />
                 <label
                   id="loginTerms"
                   className="form-check-label"
-                  for="signUpTerms"
+                  htmlFor="signUpTermskjadfs"
                   onClick={() => setloginTermsCondition(!loginTermsCondition)}
                 >
                   I accept all terms and condition
@@ -203,10 +208,24 @@ const Signup = () => {
           </div>
 
           <div
-            className="col-sm-5 py-5 px-5 "
+            className="col-12 col-sm-5 col-md-6 py-4 px-4 "
             style={{ backgroundColor: "#fff" }}
           >
-            <h1 className="text-center mt-2">Sign Up </h1>
+            <h1 className="text-center mt-2 d-flex flex-row justify-content-evenly ">
+              Sign Up
+              <span>
+                {signupIsLoading ? (
+                  <ReactLoading
+                    type="spinningBubbles"
+                    color="#2874f0"
+                    height={25}
+                    width={25}
+                  />
+                ) : (
+                  ""
+                )}
+              </span>
+            </h1>
 
             <form method="post" onSubmit={handleSignupSubmit}>
               <div className="form-floating mb-3 mt-5">
@@ -253,18 +272,21 @@ const Signup = () => {
                 />
                 <label htmlFor="floatingPassword">Password</label>
               </div>
-              <div class="form-group form-check">
+              <div className="form-group form-check">
                 <input
                   type="checkbox"
                   className="form-check-input"
-                  id="signUpTerms"
-                  checked={termsCondition}
+                  id="signUpTermskjhk"
+                  // checked={termsCondition}
+                  onChange={() =>
+                    settermsConditionCheckBox(termsConditionCheckBox)
+                  }
                   data-cy="signup termsCondition"
                 />
                 <label
                   id="signUpTerms"
                   className="form-check-label"
-                  for="signUpTerms"
+                  htmlFor="signUpTermskjhk"
                   onClick={() => settermsCondition(!termsCondition)}
                 >
                   I accept all terms and condition
@@ -280,8 +302,6 @@ const Signup = () => {
               />
             </form>
           </div>
-
-          <div className="col-sm-1"></div>
         </div>
       </div>
 

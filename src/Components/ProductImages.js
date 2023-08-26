@@ -4,37 +4,13 @@ import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { backendApis } from "../Utils/APIS";
 
 const ProductImages = (props) => {
   // console.log("Images- ", props.prop.loggedUserInfo.fetchedId )
 
-  const imagesArray = [
-    {
-      src: "https://images.unsplash.com/photo-1562183241-b937e95585b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=465&q=80",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=879&q=80",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1575537302964-96cd47c06b1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
-    },
-
-    {
-      src: "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=871&q=80",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=812&q=80",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
-    },
-  ];
-
   const [slideIndex, setSlideIndex] = useState(1);
-  const navigation = useNavigate;
+  const navigation = useNavigate();
 
   function plusSlides(n) {
     // console.log(n)
@@ -55,51 +31,50 @@ const ProductImages = (props) => {
 
   let location = useLocation();
 
-  const AddToCartBtn = (e) => {
+  const AddToCartBtn = async (e) => {
     if (props.prop.loggedUserInfo.fetchedId === undefined) {
       // console.log("yes its ")
       alert("Please Login First ");
     } else {
       // console.log("e- ", e.target.id )
 
-      // console.log("AddToCartBtn")
       let idFromUrl = document.location.href.split("/")[6];
       // console.log("id -  ", idFromUrl )
-      let sessionUrl = "http://localhost:8000/userApi/addIn-cart";
+      // let sessionUrl = "http://localhost:8000/userApi/addIn-cart";
 
       let productId = idFromUrl;
       let userId = props.prop.loggedUserInfo.fetchedId;
 
-      console.log(userId);
+      console.log(backendApis.userApi.addIn_cart);
 
-      axios
-        .post(sessionUrl, { productId, userId })
+      await axios
+        .post(backendApis.userApi.addIn_cart, { productId, userId })
 
         .then(function (response) {
-          // console.log(response)
-          if (response.data.msg === "ProductAddedInCart") {
-            alert("ProductAddedInCart");
+          console.log(response.data);
 
-            if (e.target.id === "buyNowBtns") {
-              // navigation("/checkout")
-              console.log("dsfsadfsadfsadfasfasdfas");
-              window.location.replace("/checkout");
+          if (response.data.status === 200) {
+            if (response.data.msg === "ProductAddedInCart") {
+              alert("ProductAddedInCart");
+
+              if (e.target.id === "buyNowBtns") {
+                // navigation("/checkout")
+                // console.log("dsfsadfsadfsadfasfasdfas");
+                window.location.replace("/checkout");
+              }
+              // navigation("/")
+            } else {
+              alert(response.data.msg);
             }
-          } else {
-            alert(response.data.msg);
           }
-        })
-
-        .catch(function (error) {
-          // console.log("Axios Error- " , error )
         });
     }
   };
 
   return (
     <>
-      <section className="product-details">
-        <div className="leftSection">
+      <section className="product-details row">
+        <div className="leftSection  col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2">
           {props.imagesList.map((productImage, index) => {
             return (
               <div
@@ -113,7 +88,7 @@ const ProductImages = (props) => {
           })}
         </div>
 
-        <div className="rightSection">
+        <div className="rightSection  col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
           <div className="product-page-img">
             {props.imagesList.map((productImage, index) => {
               return (

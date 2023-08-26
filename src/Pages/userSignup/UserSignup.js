@@ -6,9 +6,12 @@ import Footer from "../../Components/Footer";
 import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import { backendApis } from "../../Utils/APIS";
-
+import ReactLoading from "react-loading";
 const Signup = () => {
-  // console.log(backendApis.userApi.login )
+  // console.log( backendApis.userApi.userLogin  )
+
+  const [loginIsLoading, setloginIsLoading] = useState(false);
+  const [signupIsLoading, setsignupIsLoading] = useState(false);
 
   const [fname, setfname] = useState("");
   const [lname, setlname] = useState("");
@@ -49,23 +52,14 @@ const Signup = () => {
 
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
+    setsignupIsLoading(true);
 
-    // console.log("handle submit ");
-
-    // console.log(fname ,lname , email , password)
-
-    // console.log( djangoUserAPi.signup  )
-
-    // var session_url = "http://localhost:8000/userApi/signup";
+    // console.log(backendApis.userApi.signup);
 
     let firstName = fname;
     let LastName = lname;
     let Eemail = email;
     let Ppassword = password;
-
-    // console.log(djangoUserAPi.signup )
-
-    // ------------------------
 
     await axios
       .post(backendApis.userApi.signup, {
@@ -75,67 +69,64 @@ const Signup = () => {
         Ppassword,
       })
 
-      .then(function (response) {
-        // console.log(response);
-        // console.log(response.data);
+      .then(
+        await function (response) {
+          // console.log(response.data)
 
-        if (response.data.msg === "userSignUpSuccessfull") {
-          setfname("");
-          setlname("");
-          setemail("");
-          setpassword("");
+          if (response.data.status == 200) {
+            if (response.data.msg === "userSignUpSuccessfull") {
+              setfname("");
+              setlname("");
+              setemail("");
+              setpassword("");
 
-          alert(response.data.msg);
+              alert(response.data.msg);
+              setsignupIsLoading(false);
 
-          // window.location.replace("/signup")
-        } else {
-          // alert("Line no 63 - Wrong msg")
-          alert(response.data.msg);
+              // window.location.replace("/signup")
+            } else {
+              alert(response.data.msg);
+              setsignupIsLoading(false);
+            }
+          }
         }
-      })
-      .catch(function (error) {
-        // console.log("axios error", error  );
-      });
+      );
   };
 
   const handleLoginOnSubmit = async (e) => {
+    setloginIsLoading(true);
     e.preventDefault();
 
-    // console.log("loginEmail")
-    // console.log(loginEmail)
-    // console.log(loginPassword)
+    // console.log(backendApis.userApi.userLogin);
 
     let loginEmailId = loginEmail;
     let loginPasswords = loginPassword;
 
     await axios
-      .post(backendApis.userApi.login, {
+      .post(backendApis.userApi.userLogin, {
         loginEmailId,
         loginPasswords,
       })
 
       .then(function (response) {
+        // console.log(response.data);
         if (response.data.status === 200) {
-          if (response.data.msg == "UserLoggedIn") {
+          if (response.data.msg === "UserLoggedIn") {
             alert("UserLoggedIn");
 
-            var decoded = jwtDecode(response.data.token);
-            // console.log("jwtDecode is " , decoded )
-
+            // set token on local storage
             localStorage.setItem("userLoginToken", response.data.token);
+            setloginIsLoading(false);
 
             window.location.replace("/user");
-            // navigation("/user")
+          } else {
+            alert(response.data.msg);
+            setloginIsLoading(false);
           }
-
-          // setloggedInfo(response.data.fetchDetails)
-          // window.location.replace("/vendor")
         } else {
           alert(response.data.msg);
         }
-      })
-
-      .then(function (error) {});
+      });
   };
 
   return (
@@ -148,16 +139,29 @@ const Signup = () => {
           {/* user signup signin{" "} */}
         </h2>
 
-        <div className="container row">
-          <div className="col-sm-1"></div>
-
+        <div className="row d-flex flex-row justify-content-center">
           <div
-            className="col-sm-5 py-5 px-5  "
-            style={{ backgroundColor: "#fff", margin: "0 50px 0 0" }}
+            className="col-12 col-sm-5 col-md-5  "
+            style={{ backgroundColor: "#fff", margin: "0 20px 0 0" }}
           >
-            <form method="POST" onSubmit={handleLoginOnSubmit}>
-              <h1 className="text-center mt-3">User Login </h1>
-              <div className="form-floating mt-5 mb-3">
+            <form method="POST" className="px-4" onSubmit={handleLoginOnSubmit}>
+              <h4 className="text-center mt-3 d-flex flex-row justify-content-evenly ">
+                User Login{" "}
+                <span>
+                  {loginIsLoading ? (
+                    <ReactLoading
+                      type="spinningBubbles"
+                      color="#2874f0"
+                      height={25}
+                      width={25}
+                    />
+                  ) : (
+                    ""
+                  )}
+                </span>
+              </h4>
+
+              <div className="form-floating mt-3 mb-3">
                 <input
                   data-cy="login Email"
                   type="email"
@@ -166,6 +170,7 @@ const Signup = () => {
                   placeholder="Email address"
                   name="loginEmail"
                   onChange={inputOnChng}
+                  required
                 />
                 <label htmlFor="floatingInput">Email address</label>
               </div>
@@ -178,22 +183,24 @@ const Signup = () => {
                   placeholder="Password"
                   name="loginPassword"
                   onChange={inputOnChng}
+                  required
                 />
 
                 <label htmlFor="loginfloatingPassword">Password</label>
               </div>
-              <div class="form-group form-check">
+              <div className="form-group form-check">
                 <input
                   type="checkbox"
                   className="form-check-input"
                   id="signUpTerms"
                   checked={loginTermsCondition}
+                  onChange={() => setloginTermsCondition(loginTermsCondition)}
                   data-cy="signup termsCondition"
                 />
                 <label
                   id="loginTerms"
                   className="form-check-label"
-                  for="signUpTerms"
+                  htmlFor="signUpTerms"
                   onClick={() => setloginTermsCondition(!loginTermsCondition)}
                 >
                   I accept all terms and condition
@@ -211,13 +218,27 @@ const Signup = () => {
           </div>
 
           <div
-            className="col-sm-5 py-5 px-5 "
+            className="col-12 col-sm-5 col-md-6 "
             style={{ backgroundColor: "#fff" }}
           >
-            <h1 className="text-center mt-2">User Sign Up </h1>
+            <h4 className="text-center mt-3 d-flex flex-row justify-content-evenly ">
+              User Sign Up
+              <span>
+                {signupIsLoading ? (
+                  <ReactLoading
+                    type="spinningBubbles"
+                    color="#2874f0"
+                    height={25}
+                    width={25}
+                  />
+                ) : (
+                  ""
+                )}
+              </span>
+            </h4>
 
-            <form method="post" onSubmit={handleSignupSubmit}>
-              <div className="form-floating mb-3 mt-5">
+            <form method="post" className="px-4" onSubmit={handleSignupSubmit}>
+              <div className="form-floating mb-3 mt-3">
                 <input
                   type="text"
                   className="form-control"
@@ -276,18 +297,19 @@ const Signup = () => {
                 />
                 <label htmlFor="floatingPassword">Your Password</label>
               </div>
-              <div class="form-group form-check">
+              <div className="form-group form-check">
                 <input
                   type="checkbox"
                   className="form-check-input"
-                  id="signUpTerms"
-                  checked={termsCondition}
+                  id="signUpTermsdsfs"
+                  // checked={termsCondition}
+                  onChange={() => settermsCondition(termsCondition)}
                   data-cy="signup termsCondition"
                 />
                 <label
                   id="signUpTerms"
                   className="form-check-label"
-                  for="signUpTerms"
+                  htmlFor="signUpTermsdsfs"
                   onClick={() => settermsCondition(!termsCondition)}
                 >
                   I accept all terms and condition
@@ -302,8 +324,6 @@ const Signup = () => {
               />
             </form>
           </div>
-
-          <div className="col-sm-1"></div>
         </div>
       </div>
 

@@ -3,10 +3,9 @@ import React from "react";
 const Footer = () => {
   return (
     <>
-   
-      <footer className="aboveFooter" data-cy="footer"  >
+      <footer className="aboveFooter" data-cy="footer">
         <div className="row">
-          <div className="col-6">
+          <div className="col-lg-6 col-md-12  col-sm-12">
             <div className="row">
               <div className="col-3">
                 <p>About</p>
@@ -106,24 +105,27 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="col-6">
+          <div className="col-lg-6 col-md-12  col-sm-12">
             <div className="row">
               <div className="col-6">
                 <p>Mail Us:</p>
                 <h6>
-                  Flipkart Internet Private Limited, Buildings Alyssa, Begonia &
-                  Clove Embassy Tech Village, Outer Ring Road,
-                  Devarabeesanahalli Village, Bengaluru, 560103,
+                  Lorem Ipsum is simply dummy text of the printing and
+                  typesetting industry. Lorem Ipsum has been the industry's
+                  standard dummy text ever since the 1500s, when an unknown
+                  printer took a galley of type and scrambled it to make a type
+              
                 </h6>
               </div>
 
               <div className="col-6">
                 <p>Registered Office Address::</p>
                 <h6>
-                  Flipkart Internet Private Limited, Buildings Alyssa, Begonia &
-                  Clove Embassy Tech Village, Outer Ring Road,
-                  Devarabeesanahalli Village, Bengaluru, 560103, Karnataka,
-                  India CIN : U51109KA2012PTC066107 Telephone: 044-45614700{" "}
+                  Lorem Ipsum is simply dummy text of the printing and
+                  typesetting industry. Lorem Ipsum has been the industry's
+                  standard dummy text ever since the 1500s, when an unknown
+                  printer took a galley of type and scrambled it to make a type
+                
                 </h6>
               </div>
             </div>
@@ -131,8 +133,8 @@ const Footer = () => {
         </div>
 
         <hr className="border border-white" />
+        <h5 className="text-center text-light" > Developed by <a target="_blank" href="https://sintechworks.com/" > SintechWorks </a> </h5>
       </footer>
-  
     </>
   );
 };

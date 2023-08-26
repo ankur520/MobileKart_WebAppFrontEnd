@@ -3,39 +3,47 @@ import React from "react";
 import { BsFillImageFill, BsFillStarFill, BsStar } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-
+import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 
 import { BrowserRouter } from "react-router-dom";
-
+import { backendApis } from "../../Utils/APIS";
+import ReactLoading from "react-loading";
+// getCartData
 const AllProducts = (props) => {
-
   // <BrowserRouter>
-    const navigation = useNavigate();
-  {/* </BrowserRouter> */}
+  const navigation = useNavigate();
 
+  const [isLoading, setisLoading] = useState(false);
 
   const [placedOrderList, setplacedOrderList] = useState([]);
+  const [placedCartData, setplacedCartData] = useState([]);
 
-  const fetchFromDb = () => {
-    // console.log("------fetchFromDb------")
+  const fetchFromDb = async () => {
+    setisLoading(true);
 
-    axios
-      .get("http://localhost:8000/userApi/placeOrder/")
+    if (localStorage.getItem("userLoginToken")) {
+      let decoded = jwtDecode(localStorage.getItem("userLoginToken"));
 
-      .then(function (response) {
-        if (response.data.status === 200) {
-          // console.log("addProductGETRequest")
-          // console.log( response.data.getPlacedOrdersList )
-          setplacedOrderList(response.data.getPlacedOrdersList);
-        } else {
-          // console.log("27 Else -" , response)
-        }
-      })
+      let sessionUrl =
+        backendApis.userApi.placeOrder + `${decoded["fetchedId"]}/`;
 
-      .catch(function (error) {
-        //   console.log("Axios Error " , error )
-      });
+      // console.log(sessionUrl);
+
+      await axios
+        .get(sessionUrl)
+
+        .then(
+          await function (response) {
+            // console.log(response.data.getPlacedOrdersList)
+            if (response.data.status === 200) {
+              // setplacedOrderList(response.data.getPlacedOrdersList);
+              setplacedCartData(response.data.getCartData);
+              setisLoading(false);
+            }
+          }
+        );
+    }
   };
 
   useEffect(() => {
@@ -46,85 +54,255 @@ const AllProducts = (props) => {
 
   return (
     <>
-      <div id="allproduct" data-cy="placedOrdersList" >
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Products List</th>
-              <th scope="col">Total Payment</th>
-              <th scope="col">Payment Mode</th>
-              <th scope="col">Payment Id</th>
-              <th scope="col">Tracking No</th>
-              <th scope="col">Address Id</th>
-              <th scope="col">User ID</th>
+      <div
+        id="allproduct placedOrdersList "
+        data-cy="placedOrdersList"
+        className="py-2"
+      >
+        <span data-cy="isLoading">
+          {isLoading ? (
+            <ReactLoading
+              type="spinningBubbles"
+              color="#2874f0"
+              height={25}
+              width={25}
+            />
+          ) : (
+            ""
+          )}
+        </span>
 
-              <th scope="col">Status</th>
+        {placedCartData.map((data, index) => {
+          // console.log(data)
+          return (
+            <div
+              style={{
+                border: "1px solid #ddd",
+                borderRadius: "5px",
+                marginBottom: "10px",
+              }}
+              key={index}
+            >
+              <div
+                className="d-flex flex-row justify-content-start py-2 px-2"
+                style={{ backgroundColor: "#f0f2f2" }}
+                id="placedOrdersListHeader"
+              >
+                <div className="d-flex flex-column justify-content-start pe-3">
+                  <p
+                    style={{
+                      color: "#565959",
+                      textTransform: "uppercase",
+                      fontWeight: "600",
+                      fontSize: "10px",
+                    }}
+                  >
+                    Order Placed
+                  </p>
+                  <p
+                    style={{
+                      color: "#565959",
+                      fontWeight: "600",
+                      fontSize: "13px",
+                      marginTop: "-15px",
+                    }}
+                  >
+                    {" "}
+                    {data[0].placeOrderId.date}{" "}
+                  </p>
+                </div>
 
-              <th scope="col"> Date </th>
-            </tr>
-          </thead>
+                <div className="d-flex flex-column justify-content-start pe-3 ">
+                  <p
+                    style={{
+                      color: "#565959",
+                      textTransform: "uppercase",
+                      fontWeight: "600",
+                      fontSize: "10px",
+                    }}
+                  >
+                    Cart Total
+                  </p>
+                  <p
+                    style={{
+                      color: "#565959",
+                      fontWeight: "600",
+                      fontSize: "13px",
+                      marginTop: "-15px",
+                    }}
+                  >
+                    {" "}
+                    <span>₹</span> {data[0].placeOrderId.cartAmount}{" "}
+                  </p>
+                </div>
 
-          <tbody>
-            {placedOrderList.map((data, index) => {
-              let convertStringIntoJSON = eval(data.productsArray);
+                <div className="d-flex flex-column justify-content-start pe-3 ">
+                  <p
+                    style={{
+                      color: "#565959",
+                      textTransform: "uppercase",
+                      fontWeight: "600",
+                      fontSize: "10px",
+                    }}
+                  >
+                    Payment
+                  </p>
+                  <p
+                    style={{
+                      color: "#565959",
+                      fontWeight: "600",
+                      fontSize: "13px",
+                      marginTop: "-15px",
+                    }}
+                  >
+                    {" "}
+                    {data[0].placeOrderId.paymentMode}{" "}
+                  </p>
+                </div>
 
-              if (data.userId_id === props.userId) {
-                return (
-                  <tr key={index}>
-                    <td className="category"> {data.id} </td>
+                <div className="d-flex flex-column justify-content-start pe-3 ">
+                  <p
+                    style={{
+                      color: "#565959",
+                      textTransform: "uppercase",
+                      fontWeight: "600",
+                      fontSize: "10px",
+                    }}
+                  >
+                    Ship TO
+                  </p>
+                  <p
+                    className="d-none d-sm-block"
+                    style={{
+                      color: "#565959",
+                      fontWeight: "600",
+                      fontSize: "13px",
+                      marginTop: "-15px",
+                    }}
+                  >
+                    {" "}
+                    {data[0].placeOrderId.addressId.fullAddress}{" "}
+                    {data[0].placeOrderId.addressId.city}{" "}
+                    {data[0].placeOrderId.addressId.state}{" "}
+                  </p>
+                </div>
+              </div>
 
-                    <td>
-                      <div className="productName">
-                        <div className="belowProductName">
-                          <div>
-                            {" "}
-                            {convertStringIntoJSON.map((data, index) => {
-                              return (
-                                <p key={index} className="productName">
-                                  {" "}
-                                  <b>
-                                    {" "}
-                                    Cart Id - {data.cartId} QTY - {data.qty}{" "}
-                                  </b>{" "}
+              {/* NESTED DATA under placed Order Cart items  */}
+
+              <div className="d-flex flex-column justify-content-start py-0 ">
+                <div className="table-responsive">
+                  <table className="table table-striped">
+                    <thead>
+                      <tr>
+                        <th scope="col">S.No</th>
+                        <th scope="col">
+                          <BsFillImageFill />
+                        </th>
+                        <th scope="col">Product Name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Categories</th>
+                        <th scope="col"> Qty </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {data.map((nestedData, index) => {
+                        console.log(nestedData);
+
+                        {
+                          return (
+                            <tr key={index}>
+                              <td>
+                                <p className="productName"> {index + 1} </p>
+                              </td>
+
+                              <td scope="row">
+                                <div className="productImage">
+                                  <Link
+                                    to={`/productdetail/${nestedData.productId.CategoryId.cat_name}/${nestedData.productId.subCategoryId.sub_cat_name}/${nestedData.productId.id}/${nestedData.productId.name}/`}
+                                  >
+                                    <img
+                                      src={nestedData.productId.image1}
+                                      style={{ width: "50px", height: "50px" }}
+                                    />
+                                  </Link>
+                                </div>
+                              </td>
+
+                              <td>
+                                <p className="productName">
+                                  <Link
+                                    to={`/productdetail/${nestedData.productId.CategoryId.cat_name}/${nestedData.productId.subCategoryId.sub_cat_name}/${nestedData.productId.id}/${nestedData.productId.name}/`}
+                                  >
+                                    {nestedData.productId.name.substring(
+                                      0,
+                                      30
+                                    ) + "..."}
+                                  </Link>
                                 </p>
-                              );
-                            })}{" "}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    {/* (e) => deleteTheProduct(e, props.vendorId, data.id) */}
-                    <td className="stock fs-5 ">
-                      {" "}
-                      <span>₹</span> {data.cartAmount}{" "}
-                    </td>
-                    <td className="category"> {data.paymentMode} </td>
+                              </td>
 
-                    <td className="category"> XXXXXX {data.paymentId} </td>
+                              {/* (e) => deleteTheProduct(e, props.vendorId, nestedData.id) */}
+                              <td className="stock">
+                                {" "}
+                                <p>
+                                  <span>₹</span>{" "}
+                                  {nestedData.productId.mrp -
+                                    parseInt(
+                                      (nestedData.productId.mrp *
+                                        nestedData.productId.discountPercent) /
+                                        100
+                                    )}{" "}
+                                </p>{" "}
+                              </td>
+                              <td className="category">
+                                {" "}
+                                {nestedData.productId.CategoryId.cat_name}{" "}
+                                {
+                                  nestedData.productId.subCategoryId
+                                    .sub_cat_name
+                                }{" "}
+                              </td>
 
-                    <td className="category"> {data.trackingNo} </td>
+                              <td className="category"> {nestedData.qty}</td>
+                            </tr>
+                          );
+                        }
+                      })}
+                    </tbody>
+                  </table>
+                </div>
 
-                    <td className="category"> {data.addressId_id} </td>
-                    <td className="category"> {data.userId_id} </td>
+                {/* {data.map((nestedData, index) => {
+                  // console.log("nestedData -", nestedData);
 
-                    <td className="category"> {data.status} </td>
+                  return (
+                    <div key={index} className="d-flex flex-row justify-content-start mb-3"  style={{ borderBottom: "1px solid #ddd" , padding: "10px" }}  >
+                      <Link  className="pe-5"  >
+                        <img
+                          src={nestedData.productId.image1}
+                          alt=""
+                          className="img-fluid"
+                          style={{ width: 50, height: 50 }}
+                        />
+                      </Link>
 
-                    <td className="publish">
-                      <p>Placed Date</p>
-                      <p className="date"> {data.date.toLocaleString()} </p>
-                    </td>
-                  </tr>
-                );
-              }
+                      <Link className="pe-5" >
+                        <p> {nestedData.productId.name} </p>
+                      </Link>
 
-              // console.log("dsfa- ", typeof(data.productsArray) , data.productsArray )
-            })}
-          </tbody>
-        </table>
+                      <p className="pe-5" > {nestedData.productId.mrp} </p>
+
+                      <p className="pe-5" > {nestedData.productId.subCategoryId.catId.cat_name  } {" "} {nestedData.productId.subCategoryId.sub_cat_name  } </p>
+                    </div>
+                  );
+                })} */}
+              </div>
+            </div>
+          );
+        })}
       </div>
-
-      {(() => {})()}
     </>
   );
 };

@@ -1,27 +1,43 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import ReactLoading from "react-loading";
 
 import { message, productSliderSettings } from "../../../Utils/Util";
 
 import Slider from "react-slick";
 
 const Carousel = (props) => {
-  // console.log("Product - " , props )
+  // console.log("Product - " , props.productsArray[0]  )
 
   let sliderData = "";
 
   if (props.productsArray.length > 0) {
     sliderData = props.productsArray.map((data, index) => {
+      // console.log( data.subCategoryId.sub_cat_name)
       if (
-        data.subCategory === props.subCategory &&
+        data.subCategoryId.sub_cat_name === props.subCategory &&
         data.stockStatus === "In-Stock" &&
         data.recycleBin === false &&
         data.setFeatured === true
       ) {
         return (
           <div key={data.id}>
+            <span>
+              {props.isLoading ? (
+                <ReactLoading
+                  type="spinningBubbles"
+                  color="#2874f0"
+                  height={25}
+                  width={25}
+                />
+              ) : (
+                ""
+              )}
+            </span>
+
             <div className="productBox" data-cy="Products Available">
               <img
+                className="img-fluid"
                 style={{ width: "180px", height: "200px" }}
                 src={data.image1}
                 alt={data.subCategory}
@@ -32,10 +48,10 @@ const Carousel = (props) => {
                 style={{ fontWeight: "700", fontSize: "17px" }}
               >
                 <Link
-                  to={`/productdetail/${data.Category}/${data.subCategory}/${data.id}/${data.name}/`}
+                  to={`/productdetail/${data.CategoryId.cat_name}/${data.subCategoryId.sub_cat_name}/${data.id}/${data.name}/`}
                 >
                   {" "}
-                  {data.name.slice(0, 50) + "..."}{" "}
+                  {data.name.slice(0, 40) + "..."}{" "}
                 </Link>
               </p>
 
